@@ -3,16 +3,17 @@ using Assembler.Core.Entities;
 
 namespace Assembler.Base
 {
-    public abstract class BaseMiddleMessageHandler<TFrame, TMessage> : BaseMessageHandler<TFrame, TMessage>
+    public class MiddleMessageHandler<TFrame, TMessage> : BaseMessageHandler<TFrame, TMessage>
         where TFrame : BaseFrame
         where TMessage : BaseMessageInAssembly
     {
         private readonly ICreator<TMessage> _assembledMessageCreator;
         private readonly ILogger _logger;
 
-        protected BaseMiddleMessageHandler(ITimeBasedCache<TMessage> cache,
+        public MiddleMessageHandler(ITimeBasedCache<TMessage> cache,
             IFactory<TFrame, string> identifierFactory, ICreator<TMessage> assembledMessageCreator,
-            ILoggerFactory loggerFactory) : base(cache, identifierFactory)
+            IMessageEnricher<TFrame, TMessage> enricher, ILoggerFactory loggerFactory) : base(cache, identifierFactory,
+            enricher)
         {
             _assembledMessageCreator = assembledMessageCreator;
             _logger = loggerFactory.GetLogger(this);
@@ -20,6 +21,7 @@ namespace Assembler.Base
 
         public override void Handle(BaseFrame frame)
         {
+            //Maybe remove that
             var castFrame = frame as TFrame;
 
             var identifier = GetIdentifier(castFrame);
@@ -44,7 +46,7 @@ namespace Assembler.Base
                     $"No message in cache with the expected identifier, creating a new message [{message.Guid}]");
             }
 
-            EnrichMessageWithFrame(castFrame, message);
+            MessageEnricher.Enrich(castFrame, message);
 
             _logger.Debug(
                 $"Enriched [{message.Guid}] with the frame [{frame.Guid}] ");

@@ -1,18 +1,18 @@
-﻿using System;
-using Assembler.Core;
+﻿using Assembler.Core;
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
 
 namespace Assembler.Base
 {
-    public abstract class BaseEndMessageHandler<TFrame, TMessage> : BaseMessageHandler<TFrame, TMessage>
+    public class EndMessageHandler<TFrame, TMessage> : BaseMessageHandler<TFrame, TMessage>
         where TFrame : BaseFrame
         where TMessage : BaseMessageInAssembly
     {
         private readonly ILogger _logger;
 
-        protected BaseEndMessageHandler(ITimeBasedCache<TMessage> cache,
-            IFactory<TFrame, string> identifierFactory, ILoggerFactory loggerFactory) : base(cache, identifierFactory)
+        public EndMessageHandler(ITimeBasedCache<TMessage> cache,
+            IFactory<TFrame, string> identifierFactory, IMessageEnricher<TFrame, TMessage> enricher,
+            ILoggerFactory loggerFactory) : base(cache, identifierFactory, enricher)
         {
             _logger = loggerFactory.GetLogger(this);
         }
@@ -35,7 +35,7 @@ namespace Assembler.Base
             var message = Cache.Get<TMessage>(identifier);
             Cache.Remove(identifier);
 
-            EnrichMessageWithFrame(castFrame, message);
+            MessageEnricher.Enrich(castFrame, message);
 
             _logger.Debug(
                 $"Enriched [{message.Guid}] with the frame [{frame.Guid}]. It was removed from the cache.");

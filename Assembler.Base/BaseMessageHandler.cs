@@ -10,13 +10,16 @@ namespace Assembler.Base
     {
         protected readonly ITimeBasedCache<TMessage> Cache;
         protected readonly IFactory<TFrame, string> IdentifierFactory;
+        protected readonly IMessageEnricher<TFrame, TMessage> MessageEnricher;
 
         public event Action<BaseMessageInAssembly> OnMessageFinishedAssembly;
 
-        protected BaseMessageHandler(ITimeBasedCache<TMessage> cache, IFactory<TFrame, string> identifierFactory)
+        protected BaseMessageHandler(ITimeBasedCache<TMessage> cache, IFactory<TFrame, string> identifierFactory,
+            IMessageEnricher<TFrame, TMessage> messageEnricher)
         {
             Cache = cache;
             IdentifierFactory = identifierFactory;
+            MessageEnricher = messageEnricher;
         }
 
         protected void ReleaseMessage(TMessage message)
@@ -27,7 +30,5 @@ namespace Assembler.Base
         protected string GetIdentifier(TFrame frame) => IdentifierFactory.Create(frame);
 
         public abstract void Handle(BaseFrame message);
-
-        protected abstract void EnrichMessageWithFrame(TFrame frame, TMessage message);
     }
 }
