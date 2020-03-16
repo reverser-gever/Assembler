@@ -1,5 +1,4 @@
-﻿using System;
-using Assembler.Core.Abstractions;
+﻿using Assembler.Core.Abstractions;
 
 namespace Assembler.Core
 {
