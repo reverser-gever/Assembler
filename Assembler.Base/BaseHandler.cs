@@ -1,4 +1,5 @@
-﻿using Assembler.Core;
+﻿using System;
+using Assembler.Core;
 using Assembler.Core.Entities;
 
 namespace Assembler.Base
@@ -10,10 +11,17 @@ namespace Assembler.Base
         protected readonly ITimeBasedCache<TMessage> Cache;
         protected readonly IFactory<TFrame, string> IdentifierFactory;
 
+        public event Action<BaseMessageInAssembly> OnMessageAssembled;
+
         protected BaseHandler(ITimeBasedCache<TMessage> cache, IFactory<TFrame, string> identifierFactory)
         {
             Cache = cache;
             IdentifierFactory = identifierFactory;
+        }
+
+        protected void ReleaseMessage(TMessage message)
+        {
+            OnMessageAssembled?.Invoke(message);
         }
 
         protected string GetIdentifier(TFrame frame) => IdentifierFactory.Create(frame);

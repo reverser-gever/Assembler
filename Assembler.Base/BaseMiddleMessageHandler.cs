@@ -32,7 +32,13 @@ namespace Assembler.Base
             }
             else
             {
+                // We have a few options here, if we get a start message after that what do we do?
+                // Do we assume the order we got is wrong and keeping [MiddleReceived] as false?
+                // That way if we get a start message after this one we keep assembling as if it was the same message.
+                // If we set it to true we would create a new message if we get another start.
+
                 message = _assembledMessageCreator.Create();
+                message.MiddleReceived = true;
 
                 _logger.Debug(
                     $"No message in cache with the expected identifier, creating a new message [{message.Guid}]");

@@ -14,15 +14,15 @@ namespace Assembler.Base
 
         public Assembler(IResolver<MessageType, IHandler> resolver,
             ITimeBasedCache<BaseMessageInAssembly> cache,
-            IEnumerable<IAssemblyFinishHandler> handlersWithEvents)
+            IEnumerable<IHandler> handlers)
         {
             _resolver = resolver;
 
             cache.OnItemExpired += ReleaseExpiredMessage;
 
-            foreach (var assemblyFinishHandler in handlersWithEvents)
+            foreach (var handler in handlers)
             {
-                assemblyFinishHandler.OnMessageAssembled += ReleaseMessage;
+                handler.OnMessageAssembled += ReleaseMessage;
             }
         }
 

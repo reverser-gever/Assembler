@@ -5,13 +5,11 @@ using Assembler.Core.Enums;
 
 namespace Assembler.Base
 {
-    public abstract class BaseEndMessageHandler<TFrame, TMessage> : BaseHandler<TFrame, TMessage>, IAssemblyFinishHandler
+    public abstract class BaseEndMessageHandler<TFrame, TMessage> : BaseHandler<TFrame, TMessage>
         where TFrame : BaseFrame
         where TMessage : BaseMessageInAssembly
     {
         private readonly ILogger _logger;
-
-        public event Action<BaseMessageInAssembly> OnMessageAssembled;
 
         protected BaseEndMessageHandler(ITimeBasedCache<TMessage> cache,
             IFactory<TFrame, string> identifierFactory, ILoggerFactory loggerFactory) : base(cache, identifierFactory)
@@ -43,7 +41,7 @@ namespace Assembler.Base
                 $"Enriched [{message.Guid}] with the frame [{frame.Guid}]. It was removed from the cache.");
 
             message.ReleaseReason = ReleaseReason.EndReceived;
-            OnMessageAssembled?.Invoke(message);
+            ReleaseMessage(message);
         }
     }
 }
