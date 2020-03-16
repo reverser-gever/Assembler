@@ -1,7 +1,9 @@
-﻿namespace Assembler.Core
+﻿using Assembler.Core.Abstractions;
+
+namespace Assembler.Core
 {
     public interface IHandler
     {
-        void Handle(IMessage message);
+        void Handle(BaseFrame message);
     }
 }

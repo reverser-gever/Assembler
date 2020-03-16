@@ -3,8 +3,9 @@ using CacheManager.Core;
 
 namespace Assembler.Core
 {
-    public interface ITimeBasedCache<TIn, out TOut> : ICache<TIn>
+    public interface ITimeBasedCache<TValue> : ICache<TValue>
     {
-        event Action<TOut> ItemExpired;
+        //TODO: Replace with the one we have
+        event Action<TValue> OnItemExpired;
     }
 }

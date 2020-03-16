@@ -1,8 +1,8 @@
 ﻿namespace Assembler.Core
 {
-    public interface IResolver<in TIn, out TOut>
+    public interface IFactory<in TIn, out TOut>
     {
         //TODO: Replace with the one we have
-        TOut Resolve(TIn input);
+        TOut Create(TIn input);
     }
 }

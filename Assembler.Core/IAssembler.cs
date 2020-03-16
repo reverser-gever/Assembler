@@ -1,7 +1,12 @@
-﻿namespace Assembler.Core
+﻿using System;
+using Assembler.Core.Abstractions;
+
+namespace Assembler.Core
 {
     public interface IAssembler
     {
-        void Assemble(IMessage message);
+        void Assemble(BaseFrame message);
+
+        event Action<BaseAssembledMessage> OnItemAssembled;
     }
 }
