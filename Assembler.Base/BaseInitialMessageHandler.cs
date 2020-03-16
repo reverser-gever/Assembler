@@ -4,7 +4,7 @@ using Assembler.Core.Enums;
 
 namespace Assembler.Base
 {
-    public abstract class BaseInitialMessageHandler<TFrame, TMessage> : BaseHandler<TFrame, TMessage>
+    public abstract class BaseInitialMessageHandler<TFrame, TMessage> : BaseMessageHandler<TFrame, TMessage>
         where TFrame : BaseFrame
         where TMessage : BaseMessageInAssembly
     {

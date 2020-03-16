@@ -7,6 +7,6 @@ namespace Assembler.Core
     {
         void Handle(BaseFrame message);
 
-        event Action<BaseMessageInAssembly> OnMessageAssembled;
+        event Action<BaseMessageInAssembly> OnMessageFinishedAssembly;
     }
 }

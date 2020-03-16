@@ -8,6 +8,6 @@ namespace Assembler.Core
         // Use T where T : BaseFrame too here?
         void Assemble(BaseFrame message);
 
-        event Action<BaseAssembledMessage> OnItemAssembled;
+        event Action<BaseAssembledMessage> OnMessageAssembled;
     }
 }

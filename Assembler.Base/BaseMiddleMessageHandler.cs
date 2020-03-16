@@ -3,7 +3,7 @@ using Assembler.Core.Entities;
 
 namespace Assembler.Base
 {
-    public abstract class BaseMiddleMessageHandler<TFrame, TMessage> : BaseHandler<TFrame, TMessage>
+    public abstract class BaseMiddleMessageHandler<TFrame, TMessage> : BaseMessageHandler<TFrame, TMessage>
         where TFrame : BaseFrame
         where TMessage : BaseMessageInAssembly
     {

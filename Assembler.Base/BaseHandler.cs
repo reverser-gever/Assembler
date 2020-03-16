@@ -4,16 +4,16 @@ using Assembler.Core.Entities;
 
 namespace Assembler.Base
 {
-    public abstract class BaseHandler<TFrame, TMessage> : IHandler
+    public abstract class BaseMessageHandler<TFrame, TMessage> : IHandler
         where TFrame : BaseFrame
         where TMessage : BaseMessageInAssembly
     {
         protected readonly ITimeBasedCache<TMessage> Cache;
         protected readonly IFactory<TFrame, string> IdentifierFactory;
 
-        public event Action<BaseMessageInAssembly> OnMessageAssembled;
+        public event Action<BaseMessageInAssembly> OnMessageFinishedAssembly;
 
-        protected BaseHandler(ITimeBasedCache<TMessage> cache, IFactory<TFrame, string> identifierFactory)
+        protected BaseMessageHandler(ITimeBasedCache<TMessage> cache, IFactory<TFrame, string> identifierFactory)
         {
             Cache = cache;
             IdentifierFactory = identifierFactory;
@@ -21,7 +21,7 @@ namespace Assembler.Base
 
         protected void ReleaseMessage(TMessage message)
         {
-            OnMessageAssembled?.Invoke(message);
+            OnMessageFinishedAssembly?.Invoke(message);
         }
 
         protected string GetIdentifier(TFrame frame) => IdentifierFactory.Create(frame);
