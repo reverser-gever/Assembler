@@ -7,11 +7,11 @@ namespace Assembler.Base
 {
     public abstract class BaseEndMessageHandler<TFrame, TMessage> : BaseHandler<TFrame, TMessage>, IAssemblyFinishHandler
         where TFrame : BaseFrame
-        where TMessage : BaseAssembledMessage
+        where TMessage : BaseMessageInAssembly
     {
         private readonly ILogger _logger;
 
-        public event Action<BaseAssembledMessage> OnMessageAssembled;
+        public event Action<BaseMessageInAssembly> OnMessageAssembled;
 
         protected BaseEndMessageHandler(ITimeBasedCache<TMessage> cache,
             IFactory<TFrame, string> identifierFactory, ILoggerFactory loggerFactory) : base(cache, identifierFactory)

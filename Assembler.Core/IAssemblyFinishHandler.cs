@@ -5,6 +5,6 @@ namespace Assembler.Core
 {
     public interface IAssemblyFinishHandler : IHandler
     {
-        event Action<BaseAssembledMessage> OnMessageAssembled;
+        event Action<BaseMessageInAssembly> OnMessageAssembled;
     }
 }

@@ -5,7 +5,7 @@ namespace Assembler.Base
 {
     public abstract class BaseHandler<TFrame, TMessage> : IHandler
         where TFrame : BaseFrame
-        where TMessage : BaseAssembledMessage
+        where TMessage : BaseMessageInAssembly
     {
         protected readonly ITimeBasedCache<TMessage> Cache;
         protected readonly IFactory<TFrame, string> IdentifierFactory;

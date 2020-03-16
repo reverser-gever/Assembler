@@ -5,7 +5,7 @@ namespace Assembler.Base
 {
     public abstract class BaseInitialMessageHandler<TFrame, TMessage> : BaseHandler<TFrame, TMessage>
         where TFrame : BaseFrame
-        where TMessage : BaseAssembledMessage
+        where TMessage : BaseMessageInAssembly
     {
         private readonly ICreator<TMessage> _assembledMessageCreator;
         private readonly ILogger _logger;
