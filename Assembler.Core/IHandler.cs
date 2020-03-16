@@ -1,4 +1,4 @@
-﻿using Assembler.Core.Abstractions;
+﻿using Assembler.Core.Entities;
 
 namespace Assembler.Core
 {

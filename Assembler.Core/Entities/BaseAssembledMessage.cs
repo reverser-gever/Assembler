@@ -1,7 +1,7 @@
 ﻿using System;
 using Assembler.Core.Enums;
 
-namespace Assembler.Core.Abstractions
+namespace Assembler.Core.Entities
 {
     public abstract class BaseAssembledMessage : BaseMessage
     {

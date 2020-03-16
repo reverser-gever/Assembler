@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Assembler.Core;
-using Assembler.Core.Abstractions;
+using Assembler.Core.Entities;
 using Assembler.Core.Enums;
 
 namespace Assembler.Base

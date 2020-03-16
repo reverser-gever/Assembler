@@ -1,5 +1,5 @@
 ﻿using Assembler.Core;
-using Assembler.Core.Abstractions;
+using Assembler.Core.Entities;
 
 namespace Assembler.Base
 {

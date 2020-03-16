@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Assembler.Core.Abstractions
+namespace Assembler.Core.Entities
 {
     public abstract class BaseMessage
     {
