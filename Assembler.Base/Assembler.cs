@@ -6,17 +6,22 @@ using Assembler.Core.Enums;
 
 namespace Assembler.Base
 {
-    public class Assembler<T> : IAssembler
+    public class Assembler : IAssembler
     {
         private readonly IResolver<MessageType, IHandler> _resolver;
+        private readonly IConverter<BaseMessageInAssembly, BaseAssembledMessage> _converter;
+        private readonly ILogger _logger;
 
-        public event Action<BaseMessageInAssembly> OnItemAssembled;
+        public event Action<BaseAssembledMessage> OnItemAssembled;
 
         public Assembler(IResolver<MessageType, IHandler> resolver,
             ITimeBasedCache<BaseMessageInAssembly> cache,
-            IEnumerable<IHandler> handlers)
+            IEnumerable<IHandler> handlers, IConverter<BaseMessageInAssembly, BaseAssembledMessage> converter,
+            ILoggerFactory loggerFactory)
         {
             _resolver = resolver;
+            _converter = converter;
+            _logger = loggerFactory.GetLogger(this);
 
             cache.OnItemExpired += ReleaseExpiredMessage;
 
@@ -40,7 +45,11 @@ namespace Assembler.Base
 
         private void ReleaseMessage(BaseMessageInAssembly message)
         {
-            OnItemAssembled?.Invoke(message);
+            _logger.Info($"The message [{message.Guid}] was released, the reason for it is [{message.ReleaseReason}]");
+
+            var assembledMessage = _converter.Convert(message);
+
+            OnItemAssembled?.Invoke(assembledMessage);
         }
     }
 }

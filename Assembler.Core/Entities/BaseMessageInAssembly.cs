@@ -14,10 +14,10 @@ namespace Assembler.Core.Entities
             MiddleReceived = false;
         }
 
-        protected BaseMessageInAssembly(Guid guid) : base(guid)
-        {
-            ReleaseReason = ReleaseReason.Unreleased;
-            MiddleReceived = false;
-        }
+        //protected BaseMessageInAssembly(Guid guid) : base(guid)
+        //{
+        //    ReleaseReason = ReleaseReason.Unreleased;
+        //    MiddleReceived = false;
+        //}
     }
 }

@@ -37,7 +37,7 @@ namespace Assembler.Base
                 if (message.MiddleReceived)
                 {
                     _logger.Debug(
-                        $"Received another initial frame after started collecting the middle frames." +
+                        "Received another initial frame after started collecting the middle frames." +
                         $"The old message [{message.Guid}] will be released.");
 
                     Cache.Remove(identifier);
