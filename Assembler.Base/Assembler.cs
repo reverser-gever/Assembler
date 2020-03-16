@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net.WebSockets;
 using Assembler.Core;
@@ -14,14 +15,15 @@ namespace Assembler.Base
         public event Action<BaseAssembledMessage> OnItemAssembled;
 
         public Assembler(IResolver<MessageType, IHandler> resolver,
-            ITimeBasedCache<BaseAssembledMessage> cache)
+            ITimeBasedCache<BaseAssembledMessage> cache,
+            IEnumerable<IHandler> _handlersWithEvents)
         {
             _resolver = resolver;
 
-            cache.OnItemExpired += ReleaseItem;
+            cache.OnItemExpired += ReleaseExpiredMessage;
         }
 
-        private void ReleaseItem(BaseAssembledMessage message)
+        private void ReleaseExpiredMessage(BaseAssembledMessage message)
         {
             message.ReleaseReason = ReleaseReason.TimeoutReached;
             OnItemAssembled?.Invoke(message);
