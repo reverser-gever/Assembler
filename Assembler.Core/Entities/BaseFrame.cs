@@ -5,16 +5,16 @@ namespace Assembler.Core.Entities
 {
     public abstract class BaseFrame : BaseMessage
     {
-        public MessageType MessageType { get; }
+        public FrameType FrameType { get; }
 
-        protected BaseFrame(MessageType messageType)
+        protected BaseFrame(FrameType frameType)
         {
-            MessageType = messageType;
+            FrameType = frameType;
         }
 
-        protected BaseFrame(Guid guid, MessageType messageType) : base(guid)
+        protected BaseFrame(Guid guid, FrameType frameType) : base(guid)
         {
-            MessageType = messageType;
+            FrameType = frameType;
         }
     }
 }

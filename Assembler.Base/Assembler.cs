@@ -8,13 +8,13 @@ namespace Assembler.Base
 {
     public class Assembler : IAssembler
     {
-        private readonly IResolver<MessageType, IHandler> _resolver;
+        private readonly IResolver<FrameType, IHandler> _resolver;
         private readonly IConverter<BaseMessageInAssembly, BaseAssembledMessage> _converter;
         private readonly ILogger _logger;
 
         public event Action<BaseAssembledMessage> OnMessageAssembled;
 
-        public Assembler(IResolver<MessageType, IHandler> resolver,
+        public Assembler(IResolver<FrameType, IHandler> resolver,
             ITimeBasedCache<BaseMessageInAssembly> cache,
             IEnumerable<IHandler> handlers, IConverter<BaseMessageInAssembly, BaseAssembledMessage> converter,
             ILoggerFactory loggerFactory)
@@ -33,7 +33,7 @@ namespace Assembler.Base
 
         public void Assemble(BaseFrame message)
         {
-            var handler = _resolver.Resolve(message.MessageType);
+            var handler = _resolver.Resolve(message.FrameType);
             handler.Handle(message);
         }
 

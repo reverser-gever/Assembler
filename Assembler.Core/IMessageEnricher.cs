@@ -4,8 +4,8 @@ namespace Assembler.Core
 {
     public interface IMessageEnricher<TFrame, TMessage>
     where TFrame : BaseFrame
-    where TMessage : BaseMessage
+    where TMessage : BaseMessageInAssembly
     {
-        void Enrich(BaseFrame frame, BaseMessage message);
+        void Enrich(BaseFrame frame, BaseMessageInAssembly message);
     }
 }

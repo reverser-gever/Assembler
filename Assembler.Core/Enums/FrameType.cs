@@ -1,6 +1,6 @@
 ﻿namespace Assembler.Core.Enums
 {
-    public enum MessageType
+    public enum FrameType
     {
         Initial,
         Middle,
