@@ -1,4 +1,5 @@
-﻿using Assembler.Core;
+﻿using System;
+using Assembler.Core;
 using Assembler.Core.Entities;
 
 namespace Assembler.Base
@@ -19,8 +20,18 @@ namespace Assembler.Base
 
         public override void Handle(TFrame frame)
         {
-            var identifier = GetIdentifier(frame);
+            string identifier;
 
+            try
+            {
+                identifier = GetIdentifier(frame);
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"There was an error while getting an identifier out of the frame [{frame.Guid}], " +
+                              $"it won't be used it the assembling process \n {e}");
+                return;
+            }
             TMessage message;
 
             if (Cache.Exists(identifier))
