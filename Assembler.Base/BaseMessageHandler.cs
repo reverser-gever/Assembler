@@ -4,7 +4,7 @@ using Assembler.Core.Entities;
 
 namespace Assembler.Base
 {
-    public abstract class BaseMessageHandler<TFrame, TMessage> : IHandler
+    public abstract class BaseMessageHandler<TFrame, TMessage> : IHandler<TFrame, TMessage>
         where TFrame : BaseFrame
         where TMessage : BaseMessageInAssembly
     {
@@ -13,7 +13,7 @@ namespace Assembler.Base
         protected readonly IMessageEnricher<TFrame, TMessage> MessageEnricher;
         protected readonly ICreator<TMessage> AssembledMessageCreator;
 
-        public event Action<BaseMessageInAssembly> MessageAssemblyFinished;
+        public event Action<TMessage> MessageAssemblyFinished;
 
         protected BaseMessageHandler(ITimeBasedCache<TMessage> cache, IFactory<TFrame, string> identifierFactory,
             IMessageEnricher<TFrame, TMessage> messageEnricher, ICreator<TMessage> assembledMessageCreator)
@@ -33,6 +33,6 @@ namespace Assembler.Base
 
         protected TMessage CreateMessage() => AssembledMessageCreator.Create();
 
-        public abstract void Handle(BaseFrame message);
+        public abstract void Handle(TFrame message);
     }
 }

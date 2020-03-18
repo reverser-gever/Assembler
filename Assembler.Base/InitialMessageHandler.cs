@@ -18,11 +18,9 @@ namespace Assembler.Base
             _logger = loggerFactory.GetLogger(this);
         }
 
-        public override void Handle(BaseFrame frame)
+        public override void Handle(TFrame frame)
         {
-            var castFrame = frame as TFrame;
-
-            var identifier = GetIdentifier(castFrame);
+            var identifier = GetIdentifier(frame);
 
             TMessage message;
 
@@ -57,7 +55,7 @@ namespace Assembler.Base
                     $"No message in cache with the expected identifier, creating a new message [{message.Guid}]");
             }
 
-            MessageEnricher.Enrich(castFrame, message);
+            MessageEnricher.Enrich(frame, message);
 
             _logger.Debug(
                 $"Enriched [{message.Guid}] with the frame [{frame.Guid}] ");

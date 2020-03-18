@@ -8,7 +8,7 @@ namespace Assembler.Base
         where TFrame : BaseFrame
         where TMessage : BaseMessageInAssembly
     {
-        private readonly bool _isToReleaseOnlyEndFrame;
+        private readonly bool _isToReleaseSingleEndFrame;
         private readonly ILogger _logger;
 
         public EndMessageHandler(ITimeBasedCache<TMessage> cache,
@@ -16,15 +16,13 @@ namespace Assembler.Base
             ICreator<TMessage> assembledMessageCreator, bool isToReleaseOnlyEndFrame,
             ILoggerFactory loggerFactory) : base(cache, identifierFactory, enricher, assembledMessageCreator)
         {
-            _isToReleaseOnlyEndFrame = isToReleaseOnlyEndFrame;
+            _isToReleaseSingleEndFrame = isToReleaseOnlyEndFrame;
             _logger = loggerFactory.GetLogger(this);
         }
 
-        public override void Handle(BaseFrame frame)
+        public override void Handle(TFrame frame)
         {
-            var castFrame = frame as TFrame;
-
-            var identifier = GetIdentifier(castFrame);
+            var identifier = GetIdentifier(frame);
 
             TMessage message;
 
@@ -38,7 +36,7 @@ namespace Assembler.Base
             }
             else
             {
-                if (!_isToReleaseOnlyEndFrame)
+                if (!_isToReleaseSingleEndFrame)
                 {
                     _logger.Debug(
                         $"An end message [{frame.Guid}] was received, " +
@@ -52,7 +50,7 @@ namespace Assembler.Base
                 _logger.Debug($"A new message was created [{message.Guid}].");
             }
 
-            MessageEnricher.Enrich(castFrame, message);
+            MessageEnricher.Enrich(frame, message);
 
             _logger.Debug(
                 $"Enriched [{message.Guid}] with the frame [{frame.Guid}].");

@@ -8,15 +8,15 @@ namespace Assembler.Base
 {
     public class MessagesAssembler : IAssembler
     {
-        private readonly IResolver<FrameType, IHandler> _resolver;
+        private readonly IResolver<FrameType, IHandler<BaseFrame, BaseMessageInAssembly>> _resolver;
         private readonly IConverter<BaseMessageInAssembly, BaseAssembledMessage> _converter;
         private readonly ILogger _logger;
 
         public event Action<BaseAssembledMessage> MessageAssembled;
 
-        public MessagesAssembler(IResolver<FrameType, IHandler> resolver,
+        public MessagesAssembler(IResolver<FrameType, IHandler<BaseFrame, BaseMessageInAssembly>> resolver,
             ITimeBasedCache<BaseMessageInAssembly> cache,
-            IEnumerable<IHandler> handlers, IConverter<BaseMessageInAssembly, BaseAssembledMessage> converter,
+            IEnumerable<IHandler<BaseFrame, BaseMessageInAssembly>> handlers, IConverter<BaseMessageInAssembly, BaseAssembledMessage> converter,
             ILoggerFactory loggerFactory)
         {
             _resolver = resolver;

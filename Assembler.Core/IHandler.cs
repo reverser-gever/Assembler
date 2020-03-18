@@ -3,10 +3,12 @@ using Assembler.Core.Entities;
 
 namespace Assembler.Core
 {
-    public interface IHandler
+    public interface IHandler<in TFrame, out TMessage>
+        where TFrame : BaseFrame
+        where TMessage : BaseMessageInAssembly
     {
-        void Handle(BaseFrame message);
+        void Handle(TFrame message);
 
-        event Action<BaseMessageInAssembly> MessageAssemblyFinished;
+        event Action<TMessage> MessageAssemblyFinished;
     }
 }
