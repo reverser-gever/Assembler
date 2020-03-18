@@ -12,7 +12,7 @@ namespace Assembler.Base
         protected readonly IFactory<TFrame, string> IdentifierFactory;
         protected readonly IMessageEnricher<TFrame, TMessage> MessageEnricher;
 
-        public event Action<BaseMessageInAssembly> OnMessageFinishedAssembly;
+        public event Action<BaseMessageInAssembly> MessageAssemblyFinished;
 
         protected BaseMessageHandler(ITimeBasedCache<TMessage> cache, IFactory<TFrame, string> identifierFactory,
             IMessageEnricher<TFrame, TMessage> messageEnricher)
@@ -24,7 +24,7 @@ namespace Assembler.Base
 
         protected void ReleaseMessage(TMessage message)
         {
-            OnMessageFinishedAssembly?.Invoke(message);
+            MessageAssemblyFinished?.Invoke(message);
         }
 
         protected string GetIdentifier(TFrame frame) => IdentifierFactory.Create(frame);

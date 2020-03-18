@@ -12,7 +12,7 @@ namespace Assembler.Base
         private readonly IConverter<BaseMessageInAssembly, BaseAssembledMessage> _converter;
         private readonly ILogger _logger;
 
-        public event Action<BaseAssembledMessage> OnMessageAssembled;
+        public event Action<BaseAssembledMessage> MessageAssembled;
 
         public Assembler(IResolver<FrameType, IHandler> resolver,
             ITimeBasedCache<BaseMessageInAssembly> cache,
@@ -27,7 +27,7 @@ namespace Assembler.Base
 
             foreach (var handler in handlers)
             {
-                handler.OnMessageFinishedAssembly += ReleaseMessage;
+                handler.MessageAssemblyFinished += ReleaseMessage;
             }
         }
 
@@ -49,7 +49,7 @@ namespace Assembler.Base
 
             var assembledMessage = _converter.Convert(message);
 
-            OnMessageAssembled?.Invoke(assembledMessage);
+            MessageAssembled?.Invoke(assembledMessage);
         }
     }
 }
