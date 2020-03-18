@@ -7,15 +7,13 @@ namespace Assembler.Base
         where TFrame : BaseFrame
         where TMessage : BaseMessageInAssembly
     {
-        private readonly ICreator<TMessage> _assembledMessageCreator;
         private readonly ILogger _logger;
 
         public MiddleMessageHandler(ITimeBasedCache<TMessage> cache,
             IFactory<TFrame, string> identifierFactory, ICreator<TMessage> assembledMessageCreator,
             IMessageEnricher<TFrame, TMessage> enricher, ILoggerFactory loggerFactory) : base(cache, identifierFactory,
-            enricher)
+            enricher, assembledMessageCreator)
         {
-            _assembledMessageCreator = assembledMessageCreator;
             _logger = loggerFactory.GetLogger(this);
         }
 
@@ -39,7 +37,7 @@ namespace Assembler.Base
                 // That way if we get a start message after this one we keep assembling as if it was the same message.
                 // If we set it to true we would create a new message if we get another start.
 
-                message = _assembledMessageCreator.Create();
+                message = CreateMessage();
                 message.MiddleReceived = true;
 
                 _logger.Debug(
