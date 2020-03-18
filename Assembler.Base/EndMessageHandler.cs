@@ -27,7 +27,15 @@ namespace Assembler.Base
 
             TMessage message;
 
-            if (!Cache.Exists(identifier))
+            if (Cache.Exists(identifier))
+            {
+                message = Cache.Get<TMessage>(identifier);
+                Cache.Remove(identifier);
+
+                _logger.Debug(
+                    $"The message [{message.Guid}] was removed from the cache, it's set for release.");
+            }
+            else
             {
                 if (!_isToReleaseOnlyEndFrame)
                 {
@@ -39,17 +47,14 @@ namespace Assembler.Base
                 }
 
                 message = CreateMessage();
-            }
-            else
-            {
-                message = Cache.Get<TMessage>(identifier);
-                Cache.Remove(identifier);
+
+                _logger.Debug($"A new message was created [{message.Guid}].");
             }
 
             MessageEnricher.Enrich(castFrame, message);
 
             _logger.Debug(
-                $"Enriched [{message.Guid}] with the frame [{frame.Guid}]. It was removed from the cache.");
+                $"Enriched [{message.Guid}] with the frame [{frame.Guid}].");
 
             message.ReleaseReason = ReleaseReason.EndReceived;
             ReleaseMessage(message);
