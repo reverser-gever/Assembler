@@ -6,7 +6,7 @@ using Assembler.Core.Enums;
 
 namespace Assembler.Base
 {
-    public class Assembler : IAssembler
+    public class MessagesAssembler : IAssembler
     {
         private readonly IResolver<FrameType, IHandler> _resolver;
         private readonly IConverter<BaseMessageInAssembly, BaseAssembledMessage> _converter;
@@ -14,7 +14,7 @@ namespace Assembler.Base
 
         public event Action<BaseAssembledMessage> MessageAssembled;
 
-        public Assembler(IResolver<FrameType, IHandler> resolver,
+        public MessagesAssembler(IResolver<FrameType, IHandler> resolver,
             ITimeBasedCache<BaseMessageInAssembly> cache,
             IEnumerable<IHandler> handlers, IConverter<BaseMessageInAssembly, BaseAssembledMessage> converter,
             ILoggerFactory loggerFactory)
@@ -23,7 +23,7 @@ namespace Assembler.Base
             _converter = converter;
             _logger = loggerFactory.GetLogger(this);
 
-            cache.OnItemExpired += ReleaseExpiredMessage;
+            cache.ItemExpired += ReleaseExpiredMessage;
 
             foreach (var handler in handlers)
             {
