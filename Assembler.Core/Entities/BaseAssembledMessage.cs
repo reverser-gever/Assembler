@@ -7,9 +7,5 @@ namespace Assembler.Core.Entities
         protected BaseAssembledMessage()
         {
         }
-
-        //protected BaseAssembledMessage(Guid guid) : base(guid)
-        //{
-        //}
     }
 }
