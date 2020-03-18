@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Assembler.Base;
 using Assembler.Core;
 using Assembler.Core.Entities;

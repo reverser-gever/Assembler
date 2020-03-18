@@ -1,5 +1,4 @@
-﻿using System;
-using Assembler.Core.Enums;
+﻿using Assembler.Core.Enums;
 
 namespace Assembler.Core.Entities
 {
