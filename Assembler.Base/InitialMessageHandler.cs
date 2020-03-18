@@ -33,6 +33,7 @@ namespace Assembler.Base
                               $"it won't be used it the assembling process \n {e}");
                 return;
             }
+
             TMessage message;
 
             if (Cache.Exists(identifier))

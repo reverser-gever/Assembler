@@ -1,4 +1,5 @@
 ﻿using Assembler.Core;
+using Assembler.Core.Entities;
 using Moq;
 
 namespace Assembler.UnitTests
@@ -14,5 +15,17 @@ namespace Assembler.UnitTests
 
             return loggerFactory.Object;
         }
+
+        public static Mock<IFactory<BaseFrame, string>> GetIdentifierMock()
+        {
+            var identifierFactoryMock = new Mock<IFactory<BaseFrame, string>>();
+
+            identifierFactoryMock.Setup(identifier => identifier.Create(It.IsAny<BaseFrame>()))
+                .Returns(GetIdentifierString());
+
+            return identifierFactoryMock;
+        }
+
+        public static string GetIdentifierString() => "yes very";
     }
 }
