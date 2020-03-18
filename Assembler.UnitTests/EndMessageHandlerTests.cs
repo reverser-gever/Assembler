@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Assembler.Base;
 using Assembler.Core;
@@ -136,6 +137,26 @@ namespace Assembler.UnitTests
             _cacheMock.Verify(cache => cache.Exists(_identifierString), Times.Once);
 
             Assert.Zero(_assembledMessages.Count);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void Handle_IdentifierThrowsException_FrameNotBeingUsed(bool isToReleaseSingleEndFrame)
+        {
+            // Arrange
+            var frame = new Mock<BaseFrame>(FrameType.Initial);
+
+            var handler = GenerateHandler(isToReleaseSingleEndFrame);
+
+            _identifierFactoryMock.Setup(identifier => identifier.Create(It.IsAny<BaseFrame>()))
+                .Throws<NullReferenceException>();
+
+            // Act
+            handler.Handle(frame.Object);
+
+            // Assert
+            _identifierFactoryMock.Verify(identifier => identifier.Create(It.IsAny<BaseFrame>()), Times.Once);
+            _identifierFactoryMock.Verify(identifier => identifier.Create(frame.Object), Times.Once);
         }
 
         private EndMessageHandler<BaseFrame, BaseMessageInAssembly> GenerateHandler(bool isToReleaseSingleEndFrame)

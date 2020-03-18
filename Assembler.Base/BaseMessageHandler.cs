@@ -33,6 +33,6 @@ namespace Assembler.Base
 
         protected TMessage CreateMessage() => AssembledMessageCreator.Create();
 
-        public abstract void Handle(TFrame message);
+        public abstract void Handle(TFrame frame);
     }
 }
