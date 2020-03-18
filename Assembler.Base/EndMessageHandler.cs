@@ -12,8 +12,9 @@ namespace Assembler.Base
         private readonly ILogger _logger;
 
         public EndMessageHandler(ITimeBasedCache<TMessage> cache,
-            IFactory<TFrame, string> identifierFactory, IMessageEnricher<TFrame, TMessage> enricher, bool isToReleaseOnlyEndFrame,
-            ILoggerFactory loggerFactory) : base(cache, identifierFactory, enricher)
+            IFactory<TFrame, string> identifierFactory, IMessageEnricher<TFrame, TMessage> enricher,
+            ICreator<TMessage> assembledMessageCreator, bool isToReleaseOnlyEndFrame,
+            ILoggerFactory loggerFactory) : base(cache, identifierFactory, enricher, assembledMessageCreator)
         {
             _isToReleaseOnlyEndFrame = isToReleaseOnlyEndFrame;
             _logger = loggerFactory.GetLogger(this);
