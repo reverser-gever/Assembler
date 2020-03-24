@@ -24,24 +24,18 @@ namespace Assembler.UnitTests
         }
 
         [Test]
-        public void Enrich_MessageIsNull_DoesNotThrow()
+        public void Enrich_MessageIsNull_Throws()
         {
             // Act + Assert
             Assert.DoesNotThrow(() => _enricher.Enrich(_frameMock.Object, null));
         }
 
-        [Test]
-        public void Enrich_MessageIsNotRawMessageInAssembly_DoesNotThrow()
-        {
-            // Act + Assert
-            Assert.DoesNotThrow(() => _enricher.Enrich(_frameMock.Object, new Mock<RawMessageInAssembly>().Object));
-        }
-
-        [Test]
-        public void Enrich_NonEmptyListOfFramesInMessage_MessageBringEnriched()
+        [TestCase(1)]
+        [TestCase(10)]
+        [TestCase(100)]
+        public void Enrich_NonEmptyListOfFramesInMessage_MessageBringEnriched(int numberOfFrames)
         {
             // Arrange
-            var numberOfFrames = 10;
             for (int i = 0; i < numberOfFrames; i++)
             {
                 _message.AssembledFrames.Add(new Mock<BaseFrame>(FrameType.End).Object);

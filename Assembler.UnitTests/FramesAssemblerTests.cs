@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Assembler.Base;
 using Assembler.Core;
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
@@ -9,17 +11,17 @@ using NUnit.Framework;
 namespace Assembler.UnitTests
 {
     [TestFixture]
-    public class MessagesAssemblerTests
+    public class FramesAssemblerTests
     {
         private Mock<IResolver<FrameType, IFrameHandler<BaseFrame, BaseMessageInAssembly>>> _resolverMock;
         private Mock<IConverter<BaseMessageInAssembly, BaseAssembledMessage>> _converterMock;
         private Mock<ITimeBasedCache<BaseMessageInAssembly>> _cacheMock;
         private Mock<IFrameHandler<BaseFrame, BaseMessageInAssembly>> _firstHandlerMock;
         private Mock<IFrameHandler<BaseFrame, BaseMessageInAssembly>> _secondHandlerMock;
-        private Base.MessagesAssembler _assembler;
+        private FramesAssembler _assembler;
 
         private List<BaseAssembledMessage> _assembledMessages;
-        private List<Mock<IFrameHandler<BaseFrame, BaseMessageInAssembly>>> _handlersList;
+        private List<Mock<IFrameHandler<BaseFrame, BaseMessageInAssembly>>> _handlerMocks;
 
         [SetUp]
         public void Setup()
@@ -32,14 +34,14 @@ namespace Assembler.UnitTests
             _firstHandlerMock = new Mock<IFrameHandler<BaseFrame, BaseMessageInAssembly>>();
             _secondHandlerMock = new Mock<IFrameHandler<BaseFrame, BaseMessageInAssembly>>();
 
-            _handlersList = new List<Mock<IFrameHandler<BaseFrame, BaseMessageInAssembly>>>
+            _handlerMocks = new List<Mock<IFrameHandler<BaseFrame, BaseMessageInAssembly>>>
             {
                 _firstHandlerMock,
                 _secondHandlerMock
             };
-            var handlersList = _handlersList.Select(handlers => handlers.Object);
+            var handlersList = _handlerMocks.Select(handlers => handlers.Object);
 
-            _assembler = new Base.MessagesAssembler(_resolverMock.Object, _cacheMock.Object, handlersList,
+            _assembler = new Base.FramesAssembler(_resolverMock.Object, _cacheMock.Object, handlersList,
                 _converterMock.Object, Utilities.GetLoggerFactory());
 
             _assembler.MessageAssembled += _assembledMessages.Add;
@@ -56,20 +58,29 @@ namespace Assembler.UnitTests
         }
 
         [Test]
-        public void Constructor_NoHandlers_NoExceptionBeingThrown()
+        public void Constructor_HandlersIsNull_ArgumentNullExceptionBeingThrown()
+        {
+            // Act + Assert
+            Assert.Throws<ArgumentNullException>(() => _assembler = new Base.FramesAssembler(_resolverMock.Object,
+                _cacheMock.Object, null, _converterMock.Object, Utilities.GetLoggerFactory()));
+            Assert.Zero(_assembledMessages.Count);
+        }
+
+        [Test]
+        public void Constructor_NoHandlers_ArgumentExceptionBeingThrown()
         {
             // Arrange
             var emptyHandlersList = new List<IFrameHandler<BaseFrame, BaseMessageInAssembly>>();
 
             // Act + Assert
-            Assert.DoesNotThrow(() => _assembler = new Base.MessagesAssembler(_resolverMock.Object, _cacheMock.Object, emptyHandlersList,
-                _converterMock.Object, Utilities.GetLoggerFactory()));
+            Assert.Throws<ArgumentException>(() => _assembler = new Base.FramesAssembler(_resolverMock.Object,
+                _cacheMock.Object, emptyHandlersList, _converterMock.Object, Utilities.GetLoggerFactory()));
             Assert.Zero(_assembledMessages.Count);
         }
 
         [TestCase(0)]
         [TestCase(1)]
-        public void ReleaseMessage_FirstHandlerRaisesEvent_AssemblerConvertsAndRaises(int handlerIndex)
+        public void ReleaseMessage_OneHandlerRaisesEvent_AssemblerConvertsAndRaises(int handlerIndex)
         {
             // Arrange
             var messageInAssembly = new Mock<BaseMessageInAssembly>();
@@ -79,7 +90,7 @@ namespace Assembler.UnitTests
                 .Returns(assembledMessage.Object);
 
             // Act
-            _handlersList[handlerIndex].Raise(handler => handler.MessageAssemblyFinished += null, messageInAssembly.Object);
+            _handlerMocks[handlerIndex].Raise(handler => handler.MessageAssemblyFinished += null, messageInAssembly.Object);
 
             // Assert
             _converterMock.Verify(converter => converter.Convert(It.IsAny<BaseMessageInAssembly>()), Times.Once);

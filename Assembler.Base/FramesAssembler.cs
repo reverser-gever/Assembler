@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Assembler.Core;
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
 
 namespace Assembler.Base
 {
-    public class MessagesAssembler : IAssembler
+    public class FramesAssembler : IAssembler
     {
         private readonly IResolver<FrameType, IFrameHandler<BaseFrame, BaseMessageInAssembly>> _typeToHandlerResolver;
         private readonly IConverter<BaseMessageInAssembly, BaseAssembledMessage> _messageInAssemblyToAssembledMessageConverter;
@@ -14,7 +15,7 @@ namespace Assembler.Base
 
         public event Action<BaseAssembledMessage> MessageAssembled;
 
-        public MessagesAssembler(
+        public FramesAssembler(
             IResolver<FrameType, IFrameHandler<BaseFrame, BaseMessageInAssembly>> typeToHandlerResolver,
             ITimeBasedCache<BaseMessageInAssembly> cache, IEnumerable<IFrameHandler<BaseFrame, BaseMessageInAssembly>> handlers,
             IConverter<BaseMessageInAssembly, BaseAssembledMessage> messageInAssemblyToAssembledMessageConverter,
@@ -24,18 +25,13 @@ namespace Assembler.Base
             _messageInAssemblyToAssembledMessageConverter = messageInAssemblyToAssembledMessageConverter;
             _logger = loggerFactory.GetLogger(this);
 
-            cache.ItemExpired += ReleaseExpiredMessage;
-
-            foreach (var handler in handlers)
-            {
-                handler.MessageAssemblyFinished += ReleaseMessage;
-            }
+            SubscribeToEvents(cache, handlers);
         }
 
-        public void Assemble(BaseFrame message)
+        public void Assemble(BaseFrame frame)
         {
-            IFrameHandler<BaseFrame, BaseMessageInAssembly> handler = _typeToHandlerResolver.Resolve(message.FrameType);
-            handler.Handle(message);
+            IFrameHandler<BaseFrame, BaseMessageInAssembly> handler = _typeToHandlerResolver.Resolve(frame.FrameType);
+            handler.Handle(frame);
         }
 
         private void ReleaseExpiredMessage(BaseMessageInAssembly message)
@@ -51,6 +47,23 @@ namespace Assembler.Base
             var assembledMessage = _messageInAssemblyToAssembledMessageConverter.Convert(message);
 
             MessageAssembled?.Invoke(assembledMessage);
+        }
+
+        private void SubscribeToEvents(ITimeBasedCache<BaseMessageInAssembly> cache,
+            IEnumerable<IFrameHandler<BaseFrame, BaseMessageInAssembly>> handlers)
+        {
+            cache.ItemExpired += ReleaseExpiredMessage;
+
+            if ((handlers ?? throw new ArgumentNullException(nameof(handlers))).ToArray().Length == 0)
+            {
+                throw new ArgumentException("Handlers can't be null, please add all of the handlers that you use",
+                    nameof(handlers));
+            }
+
+            foreach (var handler in handlers)
+            {
+                handler.MessageAssemblyFinished += ReleaseMessage;
+            }
         }
     }
 }

@@ -11,7 +11,7 @@ using NUnit.Framework;
 namespace Assembler.UnitTests
 {
     [TestFixture]
-    public class EndMessageHandlerTests
+    public class EndFrameHandlerTests
     {
         private Mock<ITimeBasedCache<BaseMessageInAssembly>> _cacheMock;
         private Mock<IFactory<BaseFrame, string>> _identifierFactoryMock;
