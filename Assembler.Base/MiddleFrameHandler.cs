@@ -45,25 +45,21 @@ namespace Assembler.Base
 
         private TMessage GetOrCreateMessageInAssembly(string identifier)
         {
-            TMessage message;
-
             if (Cache.Exists(identifier))
             {
-                message = Cache.Get<TMessage>(identifier);
+                return Cache.Get<TMessage>(identifier);
             }
-            else
-            {
-                // We have a few options here, if we get a start message after that what do we do?
-                // Do we assume the order we got is wrong and keeping [MiddleReceived] as false?
-                // That way if we get a start message after this one we keep assembling as if it was the same message.
-                // If we set it to true we would create a new message if we get another start.
 
-                message = CreateMessage();
-                message.MiddleReceived = true;
+            // We have a few options here, if we get a start message after that what do we do?
+            // Do we assume the order we got is wrong and keeping [MiddleReceived] as false?
+            // That way if we get a start message after this one we keep assembling as if it was the same message.
+            // If we set it to true we would create a new message if we get another start.
 
-                _logger.Debug(
-                    $"No message in cache with the expected identifier, created a new message [{message.Guid}]");
-            }
+            var message = CreateMessage();
+            message.MiddleReceived = true;
+
+            _logger.Debug(
+                $"No message in cache with the expected identifier, created a new message [{message.Guid}]");
 
             return message;
         }

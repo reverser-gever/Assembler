@@ -48,35 +48,35 @@ namespace Assembler.Base
         {
             TMessage message;
 
-            if (Cache.Exists(identifier))
-            {
-                message = Cache.Get<TMessage>(identifier);
-
-                // Again we are facing a decision,
-                // If we get a start - middle - start, do we suppose there a was a mismatch in the order?
-                // I think that we don't, we'd start a new message
-                if (message.MiddleReceived)
-                {
-                    _logger.Debug(
-                        "Received another initial frame after started collecting the middle frames." +
-                        $"The old message [{message.Guid}] will be released.");
-
-                    Cache.Remove(identifier);
-
-                    message.ReleaseReason = ReleaseReason.AnotherMessageStarted;
-                    ReleaseMessage(message);
-
-                    message = CreateMessage();
-
-                    _logger.Debug($"A new message was created [{message.Guid}]");
-                }
-            }
-            else
+            if (!Cache.Exists(identifier))
             {
                 message = CreateMessage();
 
                 _logger.Debug(
                     $"No message in cache with the expected identifier, creating a new message [{message.Guid}]");
+
+                return message;
+            }
+
+            message = Cache.Get<TMessage>(identifier);
+
+            // Again we are facing a decision,
+            // If we get a start - middle - start, do we suppose there a was a mismatch in the order?
+            // I think that we don't, we'd start a new message
+            if (message.MiddleReceived)
+            {
+                _logger.Debug(
+                    "Received another initial frame after started collecting the middle frames." +
+                    $"The old message [{message.Guid}] will be released.");
+
+                Cache.Remove(identifier);
+
+                message.ReleaseReason = ReleaseReason.AnotherMessageStarted;
+                ReleaseMessage(message);
+
+                message = CreateMessage();
+
+                _logger.Debug($"A new message was created [{message.Guid}]");
             }
 
             return message;

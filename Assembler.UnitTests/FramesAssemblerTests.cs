@@ -41,7 +41,7 @@ namespace Assembler.UnitTests
             };
             var handlersList = _handlerMocks.Select(handlers => handlers.Object);
 
-            _assembler = new Base.FramesAssembler(_resolverMock.Object, _cacheMock.Object, handlersList,
+            _assembler = new FramesAssembler(_resolverMock.Object, _cacheMock.Object, handlersList,
                 _converterMock.Object, Utilities.GetLoggerFactory());
 
             _assembler.MessageAssembled += _assembledMessages.Add;
@@ -61,7 +61,7 @@ namespace Assembler.UnitTests
         public void Constructor_HandlersIsNull_ArgumentNullExceptionBeingThrown()
         {
             // Act + Assert
-            Assert.Throws<ArgumentNullException>(() => _assembler = new Base.FramesAssembler(_resolverMock.Object,
+            Assert.Throws<ArgumentNullException>(() => _assembler = new FramesAssembler(_resolverMock.Object,
                 _cacheMock.Object, null, _converterMock.Object, Utilities.GetLoggerFactory()));
             Assert.Zero(_assembledMessages.Count);
         }
@@ -73,7 +73,7 @@ namespace Assembler.UnitTests
             var emptyHandlersList = new List<IFrameHandler<BaseFrame, BaseMessageInAssembly>>();
 
             // Act + Assert
-            Assert.Throws<ArgumentException>(() => _assembler = new Base.FramesAssembler(_resolverMock.Object,
+            Assert.Throws<ArgumentException>(() => _assembler = new FramesAssembler(_resolverMock.Object,
                 _cacheMock.Object, emptyHandlersList, _converterMock.Object, Utilities.GetLoggerFactory()));
             Assert.Zero(_assembledMessages.Count);
         }

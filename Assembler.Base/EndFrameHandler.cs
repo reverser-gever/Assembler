@@ -36,9 +36,7 @@ namespace Assembler.Base
                 return;
             }
 
-            TMessage message = GetOrCreateMessageInAssembly(identifier);
-
-            if (message != null)
+            if (TryGetOrCreateMessageInAssembly(identifier, out var message))
             {
                 MessageEnricher.Enrich(frame, message);
 
@@ -57,10 +55,8 @@ namespace Assembler.Base
             }
         }
 
-        private TMessage GetOrCreateMessageInAssembly(string identifier)
+        private bool TryGetOrCreateMessageInAssembly(string identifier, out TMessage message)
         {
-            TMessage message;
-
             if (Cache.Exists(identifier))
             {
                 message = Cache.Get<TMessage>(identifier);
@@ -73,7 +69,8 @@ namespace Assembler.Base
             {
                 if (!_isToReleaseSingleEndFrame)
                 {
-                    return null;
+                    message = null;
+                    return false;
                 }
 
                 message = CreateMessage();
@@ -81,7 +78,7 @@ namespace Assembler.Base
                 _logger.Debug($"A new message was created [{message.Guid}].");
             }
 
-            return message;
+            return true;
         }
     }
 }

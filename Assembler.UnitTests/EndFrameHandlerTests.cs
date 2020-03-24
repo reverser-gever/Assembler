@@ -47,7 +47,7 @@ namespace Assembler.UnitTests
         public void Handle_IdentifierInCache_MessageBeingRemovedEnrichedAndRaised(bool shouldReleaseSingleEndFrame)
         {
             // Arrange
-            var frame = new Mock<BaseFrame>(FrameType.Initial);
+            var frame = new Mock<BaseFrame>(FrameType.End);
             var message = new Mock<BaseMessageInAssembly>();
             var handler = GenerateHandler(shouldReleaseSingleEndFrame);
 
@@ -84,7 +84,7 @@ namespace Assembler.UnitTests
         public void Handle_IdentifierNotInCacheAndShouldDispatchSingleFrame_MessageBeingCreatedEnrichedAndReleased()
         {
             // Arrange
-            var frame = new Mock<BaseFrame>(FrameType.Initial);
+            var frame = new Mock<BaseFrame>(FrameType.End);
             var message = new Mock<BaseMessageInAssembly>();
             var handler = GenerateHandler(true);
 
@@ -117,7 +117,7 @@ namespace Assembler.UnitTests
         public void Handle_IdentifierNotInCacheAndShouldntDispatchSingleFrame_NoMessagesBeingReleased()
         {
             // Arrange
-            var frame = new Mock<BaseFrame>(FrameType.Initial);
+            var frame = new Mock<BaseFrame>(FrameType.End);
             var handler = GenerateHandler(false);
 
             _cacheMock.Setup(cache => cache.Exists(It.IsAny<string>())).Returns(false);
@@ -140,7 +140,7 @@ namespace Assembler.UnitTests
         public void Handle_IdentifierThrowsException_FrameNotBeingUsed(bool shouldReleaseSingleEndFrame)
         {
             // Arrange
-            var frame = new Mock<BaseFrame>(FrameType.Initial);
+            var frame = new Mock<BaseFrame>(FrameType.End);
 
             var handler = GenerateHandler(shouldReleaseSingleEndFrame);
 

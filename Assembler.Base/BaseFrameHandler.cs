@@ -15,6 +15,8 @@ namespace Assembler.Base
 
         public event Action<TMessage> MessageAssemblyFinished;
 
+        public abstract void Handle(TFrame frame);
+
         protected BaseFrameHandler(ITimeBasedCache<TMessage> cache, IFactory<TFrame, string> identifierFactory,
             IMessageEnricher<TFrame, TMessage> messageEnricher, ICreator<TMessage> messageInAssemblyCreator)
         {
@@ -28,8 +30,6 @@ namespace Assembler.Base
         {
             MessageAssemblyFinished?.Invoke(message);
         }
-
-        public abstract void Handle(TFrame frame);
 
         protected string GetIdentifier(TFrame frame) => IdentifierFactory.Create(frame);
 

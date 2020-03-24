@@ -53,7 +53,7 @@ namespace Assembler.UnitTests
         public void Handle_IdentifierThrowsException_FrameNotBeingUsed()
         {
             // Arrange
-            var frame = new Mock<BaseFrame>(FrameType.End);
+            var frame = new Mock<BaseFrame>(FrameType.Middle);
 
             _identifierFactoryMock.Setup(identifier => identifier.Create(It.IsAny<BaseFrame>()))
                 .Throws<NullReferenceException>();
@@ -70,7 +70,7 @@ namespace Assembler.UnitTests
         public void Handle_MessageInCache_EnrichesItAndPutsItInTheCache()
         {
             // Arrange
-            var frame = new Mock<BaseFrame>(FrameType.End);
+            var frame = new Mock<BaseFrame>(FrameType.Middle);
             var message = new Mock<BaseMessageInAssembly>();
 
             _cacheMock.Setup(cache => cache.Exists(It.IsAny<string>())).Returns(true);
@@ -103,7 +103,7 @@ namespace Assembler.UnitTests
         public void Handle_MessageNotInCache_CreatesANewMessageAndEnrichesIt()
         {
             // Arrange
-            var frame = new Mock<BaseFrame>(FrameType.End);
+            var frame = new Mock<BaseFrame>(FrameType.Middle);
             var message = new Mock<BaseMessageInAssembly>();
 
             _cacheMock.Setup(cache => cache.Exists(It.IsAny<string>())).Returns(false);

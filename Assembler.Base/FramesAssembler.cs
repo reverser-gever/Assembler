@@ -54,7 +54,7 @@ namespace Assembler.Base
         {
             cache.ItemExpired += ReleaseExpiredMessage;
 
-            if ((handlers ?? throw new ArgumentNullException(nameof(handlers))).ToArray().Length == 0)
+            if (!(handlers ?? throw new ArgumentNullException(nameof(handlers))).Any())
             {
                 throw new ArgumentException("Handlers can't be null, please add all of the handlers that you use",
                     nameof(handlers));
