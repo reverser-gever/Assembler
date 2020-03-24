@@ -8,19 +8,20 @@ namespace Assembler.Base
 {
     public class MessagesAssembler : IAssembler
     {
-        private readonly IResolver<FrameType, IHandler<BaseFrame, BaseMessageInAssembly>> _resolver;
-        private readonly IConverter<BaseMessageInAssembly, BaseAssembledMessage> _converter;
+        private readonly IResolver<FrameType, IFrameHandler<BaseFrame, BaseMessageInAssembly>> _typeToHandlerResolver;
+        private readonly IConverter<BaseMessageInAssembly, BaseAssembledMessage> _messageInAssemblyToAssembledMessageConverter;
         private readonly ILogger _logger;
 
         public event Action<BaseAssembledMessage> MessageAssembled;
 
-        public MessagesAssembler(IResolver<FrameType, IHandler<BaseFrame, BaseMessageInAssembly>> resolver,
-            ITimeBasedCache<BaseMessageInAssembly> cache,
-            IEnumerable<IHandler<BaseFrame, BaseMessageInAssembly>> handlers, IConverter<BaseMessageInAssembly, BaseAssembledMessage> converter,
+        public MessagesAssembler(
+            IResolver<FrameType, IFrameHandler<BaseFrame, BaseMessageInAssembly>> typeToHandlerResolver,
+            ITimeBasedCache<BaseMessageInAssembly> cache, IEnumerable<IFrameHandler<BaseFrame, BaseMessageInAssembly>> handlers,
+            IConverter<BaseMessageInAssembly, BaseAssembledMessage> messageInAssemblyToAssembledMessageConverter,
             ILoggerFactory loggerFactory)
         {
-            _resolver = resolver;
-            _converter = converter;
+            _typeToHandlerResolver = typeToHandlerResolver;
+            _messageInAssemblyToAssembledMessageConverter = messageInAssemblyToAssembledMessageConverter;
             _logger = loggerFactory.GetLogger(this);
 
             cache.ItemExpired += ReleaseExpiredMessage;
@@ -33,7 +34,7 @@ namespace Assembler.Base
 
         public void Assemble(BaseFrame message)
         {
-            var handler = _resolver.Resolve(message.FrameType);
+            IFrameHandler<BaseFrame, BaseMessageInAssembly> handler = _typeToHandlerResolver.Resolve(message.FrameType);
             handler.Handle(message);
         }
 
@@ -47,7 +48,7 @@ namespace Assembler.Base
         {
             _logger.Info($"The message [{message.Guid}] was released, the reason for it is [{message.ReleaseReason}]");
 
-            var assembledMessage = _converter.Convert(message);
+            var assembledMessage = _messageInAssemblyToAssembledMessageConverter.Convert(message);
 
             MessageAssembled?.Invoke(assembledMessage);
         }

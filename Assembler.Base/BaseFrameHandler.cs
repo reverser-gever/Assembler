@@ -4,24 +4,24 @@ using Assembler.Core.Entities;
 
 namespace Assembler.Base
 {
-    public abstract class BaseMessageHandler<TFrame, TMessage> : IHandler<TFrame, TMessage>
+    public abstract class BaseFrameHandler<TFrame, TMessage> : IFrameHandler<TFrame, TMessage>
         where TFrame : BaseFrame
         where TMessage : BaseMessageInAssembly
     {
         protected readonly ITimeBasedCache<TMessage> Cache;
         protected readonly IFactory<TFrame, string> IdentifierFactory;
         protected readonly IMessageEnricher<TFrame, TMessage> MessageEnricher;
-        protected readonly ICreator<TMessage> AssembledMessageCreator;
+        protected readonly ICreator<TMessage> MessageInAssemblyCreator;
 
         public event Action<TMessage> MessageAssemblyFinished;
 
-        protected BaseMessageHandler(ITimeBasedCache<TMessage> cache, IFactory<TFrame, string> identifierFactory,
-            IMessageEnricher<TFrame, TMessage> messageEnricher, ICreator<TMessage> assembledMessageCreator)
+        protected BaseFrameHandler(ITimeBasedCache<TMessage> cache, IFactory<TFrame, string> identifierFactory,
+            IMessageEnricher<TFrame, TMessage> messageEnricher, ICreator<TMessage> messageInAssemblyCreator)
         {
             Cache = cache;
             IdentifierFactory = identifierFactory;
             MessageEnricher = messageEnricher;
-            AssembledMessageCreator = assembledMessageCreator;
+            MessageInAssemblyCreator = messageInAssemblyCreator;
         }
 
         protected void ReleaseMessage(TMessage message)
@@ -29,10 +29,10 @@ namespace Assembler.Base
             MessageAssemblyFinished?.Invoke(message);
         }
 
+        public abstract void Handle(TFrame frame);
+
         protected string GetIdentifier(TFrame frame) => IdentifierFactory.Create(frame);
 
-        protected TMessage CreateMessage() => AssembledMessageCreator.Create();
-
-        public abstract void Handle(TFrame frame);
+        protected TMessage CreateMessage() => MessageInAssemblyCreator.Create();
     }
 }

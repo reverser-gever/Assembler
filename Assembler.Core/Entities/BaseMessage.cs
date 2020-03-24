@@ -11,9 +11,8 @@ namespace Assembler.Core.Entities
             Guid = guid;
         }
 
-        protected BaseMessage()
+        protected BaseMessage() : this(Guid.NewGuid())
         {
-            Guid = Guid.NewGuid();
         }
     }
 }

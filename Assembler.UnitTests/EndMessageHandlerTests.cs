@@ -155,9 +155,9 @@ namespace Assembler.UnitTests
             _identifierFactoryMock.Verify(identifier => identifier.Create(frame.Object), Times.Once);
         }
 
-        private EndMessageHandler<BaseFrame, BaseMessageInAssembly> GenerateHandler(bool isToReleaseSingleEndFrame)
+        private EndFrameHandler<BaseFrame, BaseMessageInAssembly> GenerateHandler(bool isToReleaseSingleEndFrame)
         {
-            var handler = new EndMessageHandler<BaseFrame, BaseMessageInAssembly>(_cacheMock.Object,
+            var handler = new EndFrameHandler<BaseFrame, BaseMessageInAssembly>(_cacheMock.Object,
                 _identifierFactoryMock.Object, _enricherMock.Object, _messageInAssemblyCreatorMock.Object,
                 isToReleaseSingleEndFrame, Utilities.GetLoggerFactory());
 

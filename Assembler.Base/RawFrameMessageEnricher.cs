@@ -6,10 +6,9 @@ namespace Assembler.Base
 {
     public class RawFrameMessageEnricher : IMessageEnricher<BaseFrame, RawMessageInAssembly>
     {
-        public void Enrich(BaseFrame frame, BaseMessageInAssembly message)
+        public void Enrich(BaseFrame frame, RawMessageInAssembly message)
         {
-            var rawMessage = message as RawMessageInAssembly;
-            rawMessage?.AssembledFrames.Add(frame);
+            message.AssembledFrames.Add(frame);
         }
     }
 }

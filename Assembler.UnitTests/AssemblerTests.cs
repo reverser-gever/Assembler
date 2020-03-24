@@ -11,28 +11,28 @@ namespace Assembler.UnitTests
     [TestFixture]
     public class MessagesAssemblerTests
     {
-        private Mock<IResolver<FrameType, IHandler<BaseFrame, BaseMessageInAssembly>>> _resolverMock;
+        private Mock<IResolver<FrameType, IFrameHandler<BaseFrame, BaseMessageInAssembly>>> _resolverMock;
         private Mock<IConverter<BaseMessageInAssembly, BaseAssembledMessage>> _converterMock;
         private Mock<ITimeBasedCache<BaseMessageInAssembly>> _cacheMock;
-        private Mock<IHandler<BaseFrame, BaseMessageInAssembly>> _firstHandlerMock;
-        private Mock<IHandler<BaseFrame, BaseMessageInAssembly>> _secondHandlerMock;
+        private Mock<IFrameHandler<BaseFrame, BaseMessageInAssembly>> _firstHandlerMock;
+        private Mock<IFrameHandler<BaseFrame, BaseMessageInAssembly>> _secondHandlerMock;
         private Base.MessagesAssembler _assembler;
 
         private List<BaseAssembledMessage> _assembledMessages;
-        private List<Mock<IHandler<BaseFrame, BaseMessageInAssembly>>> _handlersList;
+        private List<Mock<IFrameHandler<BaseFrame, BaseMessageInAssembly>>> _handlersList;
 
         [SetUp]
         public void Setup()
         {
             _assembledMessages = new List<BaseAssembledMessage>();
-            _resolverMock = new Mock<IResolver<FrameType, IHandler<BaseFrame, BaseMessageInAssembly>>>();
+            _resolverMock = new Mock<IResolver<FrameType, IFrameHandler<BaseFrame, BaseMessageInAssembly>>>();
             _converterMock = new Mock<IConverter<BaseMessageInAssembly, BaseAssembledMessage>>();
             _cacheMock = new Mock<ITimeBasedCache<BaseMessageInAssembly>>();
 
-            _firstHandlerMock = new Mock<IHandler<BaseFrame, BaseMessageInAssembly>>();
-            _secondHandlerMock = new Mock<IHandler<BaseFrame, BaseMessageInAssembly>>();
+            _firstHandlerMock = new Mock<IFrameHandler<BaseFrame, BaseMessageInAssembly>>();
+            _secondHandlerMock = new Mock<IFrameHandler<BaseFrame, BaseMessageInAssembly>>();
 
-            _handlersList = new List<Mock<IHandler<BaseFrame, BaseMessageInAssembly>>>
+            _handlersList = new List<Mock<IFrameHandler<BaseFrame, BaseMessageInAssembly>>>
             {
                 _firstHandlerMock,
                 _secondHandlerMock
@@ -59,7 +59,7 @@ namespace Assembler.UnitTests
         public void Constructor_NoHandlers_NoExceptionBeingThrown()
         {
             // Arrange
-            var emptyHandlersList = new List<IHandler<BaseFrame, BaseMessageInAssembly>>();
+            var emptyHandlersList = new List<IFrameHandler<BaseFrame, BaseMessageInAssembly>>();
 
             // Act + Assert
             Assert.DoesNotThrow(() => _assembler = new Base.MessagesAssembler(_resolverMock.Object, _cacheMock.Object, emptyHandlersList,

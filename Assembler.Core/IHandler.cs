@@ -3,7 +3,7 @@ using Assembler.Core.Entities;
 
 namespace Assembler.Core
 {
-    public interface IHandler<in TFrame, out TMessage>
+    public interface IFrameHandler<in TFrame, out TMessage>
         where TFrame : BaseFrame
         where TMessage : BaseMessageInAssembly
     {

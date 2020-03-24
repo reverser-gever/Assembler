@@ -20,7 +20,7 @@ namespace Assembler.UnitTests
         private List<BaseMessageInAssembly> _assembledMessages;
         private string _identifierString;
 
-        private MiddleMessageHandler<BaseFrame, BaseMessageInAssembly> _handler;
+        private MiddleFrameHandler<BaseFrame, BaseMessageInAssembly> _handler;
 
         [SetUp]
         public void Setup()
@@ -33,7 +33,7 @@ namespace Assembler.UnitTests
 
             _assembledMessages = new List<BaseMessageInAssembly>();
 
-            _handler = new MiddleMessageHandler<BaseFrame, BaseMessageInAssembly>(_cacheMock.Object,
+            _handler = new MiddleFrameHandler<BaseFrame, BaseMessageInAssembly>(_cacheMock.Object,
                 _identifierFactoryMock.Object, _messageInAssemblyCreatorMock.Object, _enricherMock.Object,
                 Utilities.GetLoggerFactory());
 

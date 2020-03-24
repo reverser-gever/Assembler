@@ -5,13 +5,13 @@ using Assembler.Core.Enums;
 
 namespace Assembler.Base
 {
-    public class InitialMessageHandler<TFrame, TMessage> : BaseMessageHandler<TFrame, TMessage>
+    public class InitialFrameHandler<TFrame, TMessage> : BaseFrameHandler<TFrame, TMessage>
         where TFrame : BaseFrame
         where TMessage : BaseMessageInAssembly
     {
         private readonly ILogger _logger;
 
-        public InitialMessageHandler(ITimeBasedCache<TMessage> cache,
+        public InitialFrameHandler(ITimeBasedCache<TMessage> cache,
             IFactory<TFrame, string> identifierFactory, ICreator<TMessage> assembledMessageCreator,
             IMessageEnricher<TFrame, TMessage> enricher, ILoggerFactory loggerFactory) : base(cache,
             identifierFactory, enricher, assembledMessageCreator)
@@ -34,6 +34,18 @@ namespace Assembler.Base
                 return;
             }
 
+            TMessage message = GetOrCreateMessageInAssembly(identifier);
+
+            MessageEnricher.Enrich(frame, message);
+
+            _logger.Debug(
+                $"Enriched [{message.Guid}] with the frame [{frame.Guid}] ");
+
+            Cache.Put(identifier, message);
+        }
+
+        private TMessage GetOrCreateMessageInAssembly(string identifier)
+        {
             TMessage message;
 
             if (Cache.Exists(identifier))
@@ -67,12 +79,7 @@ namespace Assembler.Base
                     $"No message in cache with the expected identifier, creating a new message [{message.Guid}]");
             }
 
-            MessageEnricher.Enrich(frame, message);
-
-            _logger.Debug(
-                $"Enriched [{message.Guid}] with the frame [{frame.Guid}] ");
-
-            Cache.Put(identifier, message);
+            return message;
         }
     }
 }

@@ -34,7 +34,7 @@ namespace Assembler.UnitTests
         public void Enrich_MessageIsNotRawMessageInAssembly_DoesNotThrow()
         {
             // Act + Assert
-            Assert.DoesNotThrow(() => _enricher.Enrich(_frameMock.Object, new Mock<BaseMessageInAssembly>().Object));
+            Assert.DoesNotThrow(() => _enricher.Enrich(_frameMock.Object, new Mock<RawMessageInAssembly>().Object));
         }
 
         [Test]
