@@ -50,7 +50,7 @@ namespace Assembler.Base
                 message.MiddleReceived = true;
 
                 _logger.Debug(
-                    $"No message in cache with the expected identifier, creating a new message [{message.Guid}]");
+                    $"No message in cache with the expected identifier, created a new message [{message.Guid}]");
             }
 
             MessageEnricher.Enrich(frame, message);

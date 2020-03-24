@@ -44,12 +44,12 @@ namespace Assembler.UnitTests
 
         [TestCase(true)]
         [TestCase(false)]
-        public void Handle_IdentifierInCache_MessageBeingRemovedEnrichedAndRaised(bool isToReleaseSingleEndFrame)
+        public void Handle_IdentifierInCache_MessageBeingRemovedEnrichedAndRaised(bool shouldReleaseSingleEndFrame)
         {
             // Arrange
             var frame = new Mock<BaseFrame>(FrameType.Initial);
             var message = new Mock<BaseMessageInAssembly>();
-            var handler = GenerateHandler(isToReleaseSingleEndFrame);
+            var handler = GenerateHandler(shouldReleaseSingleEndFrame);
 
             _cacheMock.Setup(cache => cache.Exists(It.IsAny<string>())).Returns(true);
             _cacheMock.Setup(cache => cache.Get<BaseMessageInAssembly>(It.IsAny<string>())).Returns(message.Object);
@@ -81,7 +81,7 @@ namespace Assembler.UnitTests
         }
 
         [Test]
-        public void Handle_IdentifierNotInCacheAndFlagSetToYes_MessageBeingCreatedEnrichedAndReleased()
+        public void Handle_IdentifierNotInCacheAndShouldDispatchSingleFrame_MessageBeingCreatedEnrichedAndReleased()
         {
             // Arrange
             var frame = new Mock<BaseFrame>(FrameType.Initial);
@@ -114,7 +114,7 @@ namespace Assembler.UnitTests
         }
 
         [Test]
-        public void Handle_IdentifierNotInCacheAndFlagSetToFalse_NoMessagesBeingReleased()
+        public void Handle_IdentifierNotInCacheAndShouldntDispatchSingleFrame_NoMessagesBeingReleased()
         {
             // Arrange
             var frame = new Mock<BaseFrame>(FrameType.Initial);
@@ -137,14 +137,14 @@ namespace Assembler.UnitTests
 
         [TestCase(true)]
         [TestCase(false)]
-        public void Handle_IdentifierThrowsException_FrameNotBeingUsed(bool isToReleaseSingleEndFrame)
+        public void Handle_IdentifierThrowsException_FrameNotBeingUsed(bool shouldReleaseSingleEndFrame)
         {
             // Arrange
             var frame = new Mock<BaseFrame>(FrameType.Initial);
 
-            var handler = GenerateHandler(isToReleaseSingleEndFrame);
+            var handler = GenerateHandler(shouldReleaseSingleEndFrame);
 
-            _identifierFactoryMock.Setup(identifier => identifier.Create(It.IsAny<BaseFrame>()))
+            _identifierFactoryMock.Setup(identifierFactory => identifierFactory.Create(It.IsAny<BaseFrame>()))
                 .Throws<NullReferenceException>();
 
             // Act

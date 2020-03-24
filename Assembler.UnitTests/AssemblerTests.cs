@@ -130,7 +130,7 @@ namespace Assembler.UnitTests
                 .Returns(assembledMessage.Object);
 
             // Act
-            _cacheMock.Raise(handler => handler.ItemExpired += null, messageInAssembly.Object);
+            _cacheMock.Raise(cache => cache.ItemExpired += null, messageInAssembly.Object);
 
             // Assert
             _converterMock.Verify(converter => converter.Convert(It.IsAny<BaseMessageInAssembly>()), Times.Once);
