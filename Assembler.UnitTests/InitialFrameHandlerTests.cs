@@ -18,7 +18,7 @@ namespace Assembler.UnitTests
         private Mock<IMessageEnricher<BaseFrame, BaseMessageInAssembly>> _enricherMock;
         private Mock<ICreator<BaseMessageInAssembly>> _messageInAssemblyCreatorMock;
 
-        private List<BaseMessageInAssembly> _assembledMessages;
+        private List<Tuple<BaseMessageInAssembly, ReleaseReason>> _assembledMessages;
         private string _identifierString;
 
         private InitialFrameHandler<BaseFrame, BaseMessageInAssembly> _handler;
@@ -33,13 +33,18 @@ namespace Assembler.UnitTests
             _identifierString = Utilities.GetIdentifierString();
             _identifierFactoryMock = Utilities.GetIdentifierMock();
 
-            _assembledMessages = new List<BaseMessageInAssembly>();
+            _assembledMessages = new List<Tuple<BaseMessageInAssembly, ReleaseReason>>();
 
             _handler = new InitialFrameHandler<BaseFrame, BaseMessageInAssembly>(_cacheMock.Object,
                 _identifierFactoryMock.Object, _messageInAssemblyCreatorMock.Object, _enricherMock.Object,
                 Utilities.GetLoggerFactory());
 
-            _handler.MessageAssemblyFinished += _assembledMessages.Add;
+            _handler.MessageAssemblyFinished +=
+                delegate (BaseMessageInAssembly messageInAssembly, ReleaseReason releaseReason)
+                {
+                    _assembledMessages.Add(
+                        new Tuple<BaseMessageInAssembly, ReleaseReason>(messageInAssembly, releaseReason));
+                };
         }
 
         [TearDown]
@@ -97,10 +102,9 @@ namespace Assembler.UnitTests
             _cacheMock.Verify(cache => cache.Remove(It.IsAny<string>()), Times.Once);
             _cacheMock.Verify(cache => cache.Remove(_identifierString), Times.Once);
 
-            Assert.AreEqual(ReleaseReason.AnotherMessageStarted, message.Object.ReleaseReason);
-
             Assert.AreEqual(1, _assembledMessages.Count);
-            Assert.AreEqual(message.Object, _assembledMessages.First());
+            Assert.AreEqual(message.Object, _assembledMessages.First().Item1);
+            Assert.AreEqual(ReleaseReason.AnotherMessageStarted, _assembledMessages.First().Item2);
 
             _messageInAssemblyCreatorMock.Verify(creator => creator.Create(), Times.Once);
 

@@ -5,16 +5,16 @@ using Assembler.Core.Enums;
 
 namespace Assembler.Base
 {
-    public class InitialFrameHandler<TFrame, TMessage> : BaseFrameHandler<TFrame, TMessage>
+    public class InitialFrameHandler<TFrame, TMessageInAssembly> : BaseFrameHandler<TFrame, TMessageInAssembly>
         where TFrame : BaseFrame
-        where TMessage : BaseMessageInAssembly
+        where TMessageInAssembly : BaseMessageInAssembly
     {
         private readonly ILogger _logger;
 
-        public InitialFrameHandler(ITimeBasedCache<TMessage> cache,
-            IFactory<TFrame, string> identifierFactory, ICreator<TMessage> assembledMessageCreator,
-            IMessageEnricher<TFrame, TMessage> enricher, ILoggerFactory loggerFactory) : base(cache,
-            identifierFactory, enricher, assembledMessageCreator)
+        public InitialFrameHandler(ITimeBasedCache<TMessageInAssembly> timeBasedCache,
+            IFactory<TFrame, string> identifierFactory, ICreator<TMessageInAssembly> messageInAssemblyCreator,
+            IMessageEnricher<TFrame, TMessageInAssembly> messageInAssemblyEnricher, ILoggerFactory loggerFactory)
+            : base(timeBasedCache, identifierFactory, messageInAssemblyEnricher, messageInAssemblyCreator)
         {
             _logger = loggerFactory.GetLogger(this);
         }
@@ -34,21 +34,21 @@ namespace Assembler.Base
                 return;
             }
 
-            TMessage message = GetOrCreateMessageInAssembly(identifier);
+            TMessageInAssembly message = GetOrCreateMessageInAssembly(identifier);
 
-            MessageEnricher.Enrich(frame, message);
+            MessageInAssemblyEnricher.Enrich(frame, message);
 
             _logger.Debug(
                 $"Enriched [{message.Guid}] with the frame [{frame.Guid}] ");
 
-            Cache.Put(identifier, message);
+            TimeBasedCache.Put(identifier, message);
         }
 
-        private TMessage GetOrCreateMessageInAssembly(string identifier)
+        private TMessageInAssembly GetOrCreateMessageInAssembly(string identifier)
         {
-            TMessage message;
+            TMessageInAssembly message;
 
-            if (!Cache.Exists(identifier))
+            if (!TimeBasedCache.Exists(identifier))
             {
                 message = CreateMessage();
 
@@ -58,21 +58,17 @@ namespace Assembler.Base
                 return message;
             }
 
-            message = Cache.Get<TMessage>(identifier);
+            message = TimeBasedCache.Get<TMessageInAssembly>(identifier);
 
-            // Again we are facing a decision,
-            // If we get a start - middle - start, do we suppose there a was a mismatch in the order?
-            // I think that we don't, we'd start a new message
             if (message.MiddleReceived)
             {
                 _logger.Debug(
                     "Received another initial frame after started collecting the middle frames." +
                     $"The old message [{message.Guid}] will be released.");
 
-                Cache.Remove(identifier);
+                TimeBasedCache.Remove(identifier);
 
-                message.ReleaseReason = ReleaseReason.AnotherMessageStarted;
-                ReleaseMessage(message);
+                ReleaseMessage(message, ReleaseReason.AnotherMessageStarted);
 
                 message = CreateMessage();
 

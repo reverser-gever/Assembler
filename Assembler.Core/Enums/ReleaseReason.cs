@@ -2,7 +2,6 @@
 {
     public enum ReleaseReason
     {
-        Unreleased,
         EndReceived,
         TimeoutReached,
         AnotherMessageStarted

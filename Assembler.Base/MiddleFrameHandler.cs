@@ -4,16 +4,16 @@ using Assembler.Core.Entities;
 
 namespace Assembler.Base
 {
-    public class MiddleFrameHandler<TFrame, TMessage> : BaseFrameHandler<TFrame, TMessage>
+    public class MiddleFrameHandler<TFrame, TMessageInAssembly> : BaseFrameHandler<TFrame, TMessageInAssembly>
         where TFrame : BaseFrame
-        where TMessage : BaseMessageInAssembly
+        where TMessageInAssembly : BaseMessageInAssembly
     {
         private readonly ILogger _logger;
 
-        public MiddleFrameHandler(ITimeBasedCache<TMessage> cache,
-            IFactory<TFrame, string> identifierFactory, ICreator<TMessage> assembledMessageCreator,
-            IMessageEnricher<TFrame, TMessage> enricher, ILoggerFactory loggerFactory) : base(cache, identifierFactory,
-            enricher, assembledMessageCreator)
+        public MiddleFrameHandler(ITimeBasedCache<TMessageInAssembly> timeBasedCache,
+            IFactory<TFrame, string> identifierFactory, ICreator<TMessageInAssembly> messageInAssemblyCtrCreator,
+            IMessageEnricher<TFrame, TMessageInAssembly> messageInAssemblyEnricher, ILoggerFactory loggerFactory)
+            : base(timeBasedCache, identifierFactory, messageInAssemblyEnricher, messageInAssemblyCtrCreator)
         {
             _logger = loggerFactory.GetLogger(this);
         }
@@ -33,27 +33,22 @@ namespace Assembler.Base
                 return;
             }
 
-            TMessage message = GetOrCreateMessageInAssembly(identifier);
+            TMessageInAssembly message = GetOrCreateMessageInAssembly(identifier);
 
-            MessageEnricher.Enrich(frame, message);
+            MessageInAssemblyEnricher.Enrich(frame, message);
 
             _logger.Debug(
                 $"Enriched [{message.Guid}] with the frame [{frame.Guid}] ");
 
-            Cache.Put(identifier, message);
+            TimeBasedCache.Put(identifier, message);
         }
 
-        private TMessage GetOrCreateMessageInAssembly(string identifier)
+        private TMessageInAssembly GetOrCreateMessageInAssembly(string identifier)
         {
-            if (Cache.Exists(identifier))
+            if (TimeBasedCache.Exists(identifier))
             {
-                return Cache.Get<TMessage>(identifier);
+                return TimeBasedCache.Get<TMessageInAssembly>(identifier);
             }
-
-            // We have a few options here, if we get a start message after that what do we do?
-            // Do we assume the order we got is wrong and keeping [MiddleReceived] as false?
-            // That way if we get a start message after this one we keep assembling as if it was the same message.
-            // If we set it to true we would create a new message if we get another start.
 
             var message = CreateMessage();
             message.MiddleReceived = true;

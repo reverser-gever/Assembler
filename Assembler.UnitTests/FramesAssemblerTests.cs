@@ -18,7 +18,7 @@ namespace Assembler.UnitTests
         private Mock<ITimeBasedCache<BaseMessageInAssembly>> _cacheMock;
         private Mock<IFrameHandler<BaseFrame, BaseMessageInAssembly>> _firstHandlerMock;
         private Mock<IFrameHandler<BaseFrame, BaseMessageInAssembly>> _secondHandlerMock;
-        private FramesAssembler _assembler;
+        private FramesAssembler<BaseFrame, BaseAssembledMessage> _assembler;
 
         private List<BaseAssembledMessage> _assembledMessages;
         private List<Mock<IFrameHandler<BaseFrame, BaseMessageInAssembly>>> _handlerMocks;
@@ -41,7 +41,8 @@ namespace Assembler.UnitTests
             };
             var handlersList = _handlerMocks.Select(handlers => handlers.Object);
 
-            _assembler = new FramesAssembler(_resolverMock.Object, _cacheMock.Object, handlersList,
+            _assembler = new FramesAssembler<BaseFrame, BaseAssembledMessage>(_resolverMock.Object, _cacheMock.Object,
+                handlersList,
                 _converterMock.Object, Utilities.GetLoggerFactory());
 
             _assembler.MessageAssembled += _assembledMessages.Add;
@@ -61,8 +62,9 @@ namespace Assembler.UnitTests
         public void Constructor_HandlersIsNull_ArgumentNullExceptionBeingThrown()
         {
             // Act + Assert
-            Assert.Throws<ArgumentNullException>(() => _assembler = new FramesAssembler(_resolverMock.Object,
-                _cacheMock.Object, null, _converterMock.Object, Utilities.GetLoggerFactory()));
+            Assert.Throws<ArgumentNullException>(() => _assembler =
+                new FramesAssembler<BaseFrame, BaseAssembledMessage>(_resolverMock.Object,
+                    _cacheMock.Object, null, _converterMock.Object, Utilities.GetLoggerFactory()));
             Assert.Zero(_assembledMessages.Count);
         }
 
@@ -73,7 +75,8 @@ namespace Assembler.UnitTests
             var emptyHandlersList = new List<IFrameHandler<BaseFrame, BaseMessageInAssembly>>();
 
             // Act + Assert
-            Assert.Throws<ArgumentException>(() => _assembler = new FramesAssembler(_resolverMock.Object,
+            Assert.Throws<ArgumentException>(() => _assembler = new FramesAssembler<BaseFrame, BaseAssembledMessage>(
+                _resolverMock.Object,
                 _cacheMock.Object, emptyHandlersList, _converterMock.Object, Utilities.GetLoggerFactory()));
             Assert.Zero(_assembledMessages.Count);
         }
@@ -90,7 +93,8 @@ namespace Assembler.UnitTests
                 .Returns(assembledMessage.Object);
 
             // Act
-            _handlerMocks[handlerIndex].Raise(handler => handler.MessageAssemblyFinished += null, messageInAssembly.Object);
+            _handlerMocks[handlerIndex]
+                .Raise(handler => handler.MessageAssemblyFinished += null, messageInAssembly.Object, ReleaseReason.EndReceived);
 
             // Assert
             _converterMock.Verify(converter => converter.Convert(It.IsAny<BaseMessageInAssembly>()), Times.Once);
@@ -110,7 +114,8 @@ namespace Assembler.UnitTests
             var secondMessageInAssembly = new Mock<BaseMessageInAssembly>();
             var secondAssembledMessage = new Mock<BaseAssembledMessage>();
 
-            var assembledMessages = new List<BaseAssembledMessage> { firstAssembledMessage.Object, secondAssembledMessage.Object };
+            var assembledMessages = new List<BaseAssembledMessage>
+                {firstAssembledMessage.Object, secondAssembledMessage.Object};
 
             _converterMock.Setup(converter => converter.Convert(firstMessageInAssembly.Object))
                 .Returns(firstAssembledMessage.Object);
@@ -118,8 +123,10 @@ namespace Assembler.UnitTests
                 .Returns(secondAssembledMessage.Object);
 
             // Act
-            _firstHandlerMock.Raise(handler => handler.MessageAssemblyFinished += null, firstMessageInAssembly.Object);
-            _secondHandlerMock.Raise(handler => handler.MessageAssemblyFinished += null, secondMessageInAssembly.Object);
+            _firstHandlerMock.Raise(handler => handler.MessageAssemblyFinished += null, firstMessageInAssembly.Object,
+                ReleaseReason.EndReceived);
+            _secondHandlerMock.Raise(handler => handler.MessageAssemblyFinished += null,
+                secondMessageInAssembly.Object, ReleaseReason.EndReceived);
 
             // Assert
             _converterMock.Verify(converter => converter.Convert(It.IsAny<BaseMessageInAssembly>()), Times.Exactly(2));
@@ -146,8 +153,6 @@ namespace Assembler.UnitTests
             // Assert
             _converterMock.Verify(converter => converter.Convert(It.IsAny<BaseMessageInAssembly>()), Times.Once);
             _converterMock.Verify(converter => converter.Convert(messageInAssembly.Object), Times.Once);
-
-            Assert.AreEqual(ReleaseReason.TimeoutReached, messageInAssembly.Object.ReleaseReason);
 
             Assert.AreEqual(1, _assembledMessages.Count);
             Assert.AreEqual(assembledMessage.Object, _assembledMessages.First());

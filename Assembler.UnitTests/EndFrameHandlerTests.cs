@@ -18,7 +18,7 @@ namespace Assembler.UnitTests
         private Mock<IMessageEnricher<BaseFrame, BaseMessageInAssembly>> _enricherMock;
         private Mock<ICreator<BaseMessageInAssembly>> _messageInAssemblyCreatorMock;
 
-        private List<BaseMessageInAssembly> _assembledMessages;
+        private List<Tuple<BaseMessageInAssembly, ReleaseReason>> _assembledMessages;
         private string _identifierString;
 
         [SetUp]
@@ -30,7 +30,7 @@ namespace Assembler.UnitTests
             _identifierString = Utilities.GetIdentifierString();
             _identifierFactoryMock = Utilities.GetIdentifierMock();
 
-            _assembledMessages = new List<BaseMessageInAssembly>();
+            _assembledMessages = new List<Tuple<BaseMessageInAssembly, ReleaseReason>>();
         }
 
         [TearDown]
@@ -74,10 +74,9 @@ namespace Assembler.UnitTests
                 Times.Once);
             _enricherMock.Verify(enricher => enricher.Enrich(frame.Object, message.Object), Times.Once);
 
-            Assert.AreEqual(ReleaseReason.EndReceived, message.Object.ReleaseReason);
-
             Assert.AreEqual(1, _assembledMessages.Count);
-            Assert.AreEqual(message.Object, _assembledMessages.First());
+            Assert.AreEqual(message.Object, _assembledMessages.First().Item1);
+            Assert.AreEqual(ReleaseReason.EndReceived, _assembledMessages.First().Item2);
         }
 
         [Test]
@@ -107,10 +106,9 @@ namespace Assembler.UnitTests
                 Times.Once);
             _enricherMock.Verify(enricher => enricher.Enrich(frame.Object, message.Object), Times.Once);
 
-            Assert.AreEqual(ReleaseReason.EndReceived, message.Object.ReleaseReason);
-
             Assert.AreEqual(1, _assembledMessages.Count);
-            Assert.AreEqual(message.Object, _assembledMessages.First());
+            Assert.AreEqual(message.Object, _assembledMessages.First().Item1);
+            Assert.AreEqual(ReleaseReason.EndReceived, _assembledMessages.First().Item2);
         }
 
         [Test]
@@ -161,7 +159,12 @@ namespace Assembler.UnitTests
                 _identifierFactoryMock.Object, _enricherMock.Object, _messageInAssemblyCreatorMock.Object,
                 isToReleaseSingleEndFrame, Utilities.GetLoggerFactory());
 
-            handler.MessageAssemblyFinished += _assembledMessages.Add;
+            handler.MessageAssemblyFinished +=
+                delegate (BaseMessageInAssembly messageInAssembly, ReleaseReason releaseReason)
+                {
+                    _assembledMessages.Add(
+                        new Tuple<BaseMessageInAssembly, ReleaseReason>(messageInAssembly, releaseReason));
+                };
 
             return handler;
         }

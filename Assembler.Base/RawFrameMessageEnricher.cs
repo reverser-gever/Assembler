@@ -8,7 +8,7 @@ namespace Assembler.Base
     {
         public void Enrich(BaseFrame frame, RawMessageInAssembly message)
         {
-            message?.AssembledFrames.Add(frame);
+            message.AssembledFrames.Add(frame);
         }
     }
 }

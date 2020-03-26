@@ -1,5 +1,6 @@
 ﻿using System;
 using Assembler.Core.Entities;
+using Assembler.Core.Enums;
 
 namespace Assembler.Core
 {
@@ -9,6 +10,6 @@ namespace Assembler.Core
     {
         void Handle(TFrame message);
 
-        event Action<TMessage> MessageAssemblyFinished;
+        event Action<TMessage, ReleaseReason> MessageAssemblyFinished;
     }
 }

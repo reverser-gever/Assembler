@@ -17,7 +17,7 @@ namespace Assembler.UnitTests
         private Mock<IMessageEnricher<BaseFrame, BaseMessageInAssembly>> _enricherMock;
         private Mock<ICreator<BaseMessageInAssembly>> _messageInAssemblyCreatorMock;
 
-        private List<BaseMessageInAssembly> _assembledMessages;
+        private List<Tuple<BaseMessageInAssembly, ReleaseReason>> _assembledMessages;
         private string _identifierString;
 
         private MiddleFrameHandler<BaseFrame, BaseMessageInAssembly> _handler;
@@ -31,13 +31,18 @@ namespace Assembler.UnitTests
             _identifierString = Utilities.GetIdentifierString();
             _identifierFactoryMock = Utilities.GetIdentifierMock();
 
-            _assembledMessages = new List<BaseMessageInAssembly>();
+            _assembledMessages = new List<Tuple<BaseMessageInAssembly, ReleaseReason>>();
 
             _handler = new MiddleFrameHandler<BaseFrame, BaseMessageInAssembly>(_cacheMock.Object,
                 _identifierFactoryMock.Object, _messageInAssemblyCreatorMock.Object, _enricherMock.Object,
                 Utilities.GetLoggerFactory());
 
-            _handler.MessageAssemblyFinished += _assembledMessages.Add;
+            _handler.MessageAssemblyFinished +=
+                delegate (BaseMessageInAssembly messageInAssembly, ReleaseReason releaseReason)
+                {
+                    _assembledMessages.Add(
+                        new Tuple<BaseMessageInAssembly, ReleaseReason>(messageInAssembly, releaseReason));
+                };
         }
 
         [TearDown]

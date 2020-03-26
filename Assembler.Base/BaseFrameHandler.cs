@@ -1,6 +1,7 @@
 ﻿using System;
 using Assembler.Core;
 using Assembler.Core.Entities;
+using Assembler.Core.Enums;
 
 namespace Assembler.Base
 {
@@ -8,27 +9,27 @@ namespace Assembler.Base
         where TFrame : BaseFrame
         where TMessage : BaseMessageInAssembly
     {
-        protected readonly ITimeBasedCache<TMessage> Cache;
+        protected readonly ITimeBasedCache<TMessage> TimeBasedCache;
         protected readonly IFactory<TFrame, string> IdentifierFactory;
-        protected readonly IMessageEnricher<TFrame, TMessage> MessageEnricher;
+        protected readonly IMessageEnricher<TFrame, TMessage> MessageInAssemblyEnricher;
         protected readonly ICreator<TMessage> MessageInAssemblyCreator;
 
-        public event Action<TMessage> MessageAssemblyFinished;
+        public event Action<TMessage, ReleaseReason> MessageAssemblyFinished;
 
-        public abstract void Handle(TFrame frame);
-
-        protected BaseFrameHandler(ITimeBasedCache<TMessage> cache, IFactory<TFrame, string> identifierFactory,
-            IMessageEnricher<TFrame, TMessage> messageEnricher, ICreator<TMessage> messageInAssemblyCreator)
+        protected BaseFrameHandler(ITimeBasedCache<TMessage> timeBasedCache, IFactory<TFrame, string> identifierFactory,
+            IMessageEnricher<TFrame, TMessage> messageInAssemblyEnricher, ICreator<TMessage> messageInAssemblyCreator)
         {
-            Cache = cache;
+            TimeBasedCache = timeBasedCache;
             IdentifierFactory = identifierFactory;
-            MessageEnricher = messageEnricher;
+            MessageInAssemblyEnricher = messageInAssemblyEnricher;
             MessageInAssemblyCreator = messageInAssemblyCreator;
         }
 
-        protected void ReleaseMessage(TMessage message)
+        public abstract void Handle(TFrame frame);
+
+        protected void ReleaseMessage(TMessage message, ReleaseReason releaseReason)
         {
-            MessageAssemblyFinished?.Invoke(message);
+            MessageAssemblyFinished?.Invoke(message, releaseReason);
         }
 
         protected string GetIdentifier(TFrame frame) => IdentifierFactory.Create(frame);

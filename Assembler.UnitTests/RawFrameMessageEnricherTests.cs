@@ -23,13 +23,6 @@ namespace Assembler.UnitTests
             _enricher = new RawFrameMessageEnricher();
         }
 
-        [Test]
-        public void Enrich_MessageIsNull_Throws()
-        {
-            // Act + Assert
-            Assert.DoesNotThrow(() => _enricher.Enrich(_frameMock.Object, null));
-        }
-
         [TestCase(1)]
         [TestCase(10)]
         [TestCase(100)]

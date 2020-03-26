@@ -5,19 +5,20 @@ using Assembler.Core.Enums;
 
 namespace Assembler.Base
 {
-    public class EndFrameHandler<TFrame, TMessage> : BaseFrameHandler<TFrame, TMessage>
+    public class EndFrameHandler<TFrame, TMessageInAssembly> : BaseFrameHandler<TFrame, TMessageInAssembly>
         where TFrame : BaseFrame
-        where TMessage : BaseMessageInAssembly
+        where TMessageInAssembly : BaseMessageInAssembly
     {
-        private readonly bool _isToReleaseSingleEndFrame;
+        private readonly bool _shouldReleaseMessageWithOnlyEndFrame;
         private readonly ILogger _logger;
 
-        public EndFrameHandler(ITimeBasedCache<TMessage> cache,
-            IFactory<TFrame, string> identifierFactory, IMessageEnricher<TFrame, TMessage> enricher,
-            ICreator<TMessage> assembledMessageCreator, bool isToReleaseOnlyEndFrame,
-            ILoggerFactory loggerFactory) : base(cache, identifierFactory, enricher, assembledMessageCreator)
+        public EndFrameHandler(ITimeBasedCache<TMessageInAssembly> timeBasedCache,
+            IFactory<TFrame, string> identifierFactory, IMessageEnricher<TFrame, TMessageInAssembly> messageInAssemblyEnricher,
+            ICreator<TMessageInAssembly> messageInAssemblyCreator, bool shouldReleaseMessageWithOnlyEndFrame,
+            ILoggerFactory loggerFactory) : base(timeBasedCache, identifierFactory, messageInAssemblyEnricher,
+            messageInAssemblyCreator)
         {
-            _isToReleaseSingleEndFrame = isToReleaseOnlyEndFrame;
+            _shouldReleaseMessageWithOnlyEndFrame = shouldReleaseMessageWithOnlyEndFrame;
             _logger = loggerFactory.GetLogger(this);
         }
 
@@ -38,13 +39,12 @@ namespace Assembler.Base
 
             if (TryGetOrCreateMessageInAssembly(identifier, out var message))
             {
-                MessageEnricher.Enrich(frame, message);
+                MessageInAssemblyEnricher.Enrich(frame, message);
 
                 _logger.Debug(
                     $"Enriched [{message.Guid}] with the frame [{frame.Guid}].");
 
-                message.ReleaseReason = ReleaseReason.EndReceived;
-                ReleaseMessage(message);
+                ReleaseMessage(message, ReleaseReason.EndReceived);
             }
             else
             {
@@ -55,19 +55,19 @@ namespace Assembler.Base
             }
         }
 
-        private bool TryGetOrCreateMessageInAssembly(string identifier, out TMessage message)
+        private bool TryGetOrCreateMessageInAssembly(string identifier, out TMessageInAssembly message)
         {
-            if (Cache.Exists(identifier))
+            if (TimeBasedCache.Exists(identifier))
             {
-                message = Cache.Get<TMessage>(identifier);
-                Cache.Remove(identifier);
+                message = TimeBasedCache.Get<TMessageInAssembly>(identifier);
+                TimeBasedCache.Remove(identifier);
 
                 _logger.Debug(
                     $"The message [{message.Guid}] was removed from the cache, it's set for release.");
             }
             else
             {
-                if (!_isToReleaseSingleEndFrame)
+                if (!_shouldReleaseMessageWithOnlyEndFrame)
                 {
                     message = null;
                     return false;

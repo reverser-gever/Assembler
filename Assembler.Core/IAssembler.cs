@@ -3,11 +3,12 @@ using Assembler.Core.Entities;
 
 namespace Assembler.Core
 {
-    public interface IAssembler
+    public interface IAssembler<in TFrame, out TAssembledMessage>
+        where TFrame : BaseFrame
+        where TAssembledMessage : BaseAssembledMessage
     {
-        // Use T where T : BaseFrame too here?
-        void Assemble(BaseFrame message);
+        void Assemble(TFrame message);
 
-        event Action<BaseAssembledMessage> MessageAssembled;
+        event Action<TAssembledMessage> MessageAssembled;
     }
 }
