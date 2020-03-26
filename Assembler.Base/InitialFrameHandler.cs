@@ -13,8 +13,10 @@ namespace Assembler.Base
 
         public InitialFrameHandler(ITimeBasedCache<TMessageInAssembly> timeBasedCache,
             IFactory<TFrame, string> identifierFactory, ICreator<TMessageInAssembly> messageInAssemblyCreator,
-            IMessageEnricher<TFrame, TMessageInAssembly> messageInAssemblyEnricher, ILoggerFactory loggerFactory)
-            : base(timeBasedCache, identifierFactory, messageInAssemblyEnricher, messageInAssemblyCreator)
+            IMessageEnricher<TFrame, TMessageInAssembly> messageInAssemblyEnricher,
+            IMessageReleaser<TMessageInAssembly> messageReleaser, ILoggerFactory loggerFactory)
+            : base(timeBasedCache, identifierFactory, messageInAssemblyEnricher, messageInAssemblyCreator,
+                messageReleaser)
         {
             _logger = loggerFactory.GetLogger(this);
         }

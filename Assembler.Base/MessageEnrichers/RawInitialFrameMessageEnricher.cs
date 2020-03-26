@@ -2,13 +2,13 @@
 using Assembler.Core.Entities;
 using Assembler.Core.RawAssemblingEntities;
 
-namespace Assembler.Base
+namespace Assembler.Base.MessageEnrichers
 {
-    public class RawFrameMessageEnricher : IMessageEnricher<BaseFrame, RawMessageInAssembly>
+    public class RawInitialFrameMessageEnricher : IMessageEnricher<BaseFrame, RawMessageInAssembly>
     {
         public void Enrich(BaseFrame frame, RawMessageInAssembly message)
         {
-            message.AssembledFrames.Add(frame);
+            message.InitialFrames.Add(frame);
         }
     }
 }

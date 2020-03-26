@@ -60,7 +60,7 @@ namespace Assembler.UnitTests
         public void Handle_IdentifierThrowsException_FrameNotBeingUsed()
         {
             // Arrange
-            var frame = new Mock<BaseFrame>(FrameType.Initial);
+            var frame = new Mock<BaseFrame>(AssemblingPosition.Initial);
 
             _identifierFactoryMock.Setup(identifier => identifier.Create(It.IsAny<BaseFrame>()))
                 .Throws<NullReferenceException>();
@@ -77,7 +77,7 @@ namespace Assembler.UnitTests
         public void Handle_MessageInCacheAndMiddleReceived_ReleasesTheOldOneAndCreatesANewOne()
         {
             // Arrange
-            var frame = new Mock<BaseFrame>(FrameType.Initial);
+            var frame = new Mock<BaseFrame>(AssemblingPosition.Initial);
             var message = new Mock<BaseMessageInAssembly>();
             var newMessage = new Mock<BaseMessageInAssembly>();
             message.Object.MiddleReceived = true;
@@ -120,7 +120,7 @@ namespace Assembler.UnitTests
         public void Handle_MessageInCacheAndMiddleNotReceived_EnrichesTheExistingMessage()
         {
             // Arrange
-            var frame = new Mock<BaseFrame>(FrameType.Initial);
+            var frame = new Mock<BaseFrame>(AssemblingPosition.Initial);
             var message = new Mock<BaseMessageInAssembly>();
             message.Object.MiddleReceived = false;
 
@@ -154,7 +154,7 @@ namespace Assembler.UnitTests
         public void Handle_MessageNotInCache_CreatesANewMessageAndEnrichesIt()
         {
             // Arrange
-            var frame = new Mock<BaseFrame>(FrameType.Initial);
+            var frame = new Mock<BaseFrame>(AssemblingPosition.Initial);
             var message = new Mock<BaseMessageInAssembly>();
             message.Object.MiddleReceived = false;
 

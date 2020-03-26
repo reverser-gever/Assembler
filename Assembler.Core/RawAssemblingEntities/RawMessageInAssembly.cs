@@ -5,11 +5,15 @@ namespace Assembler.Core.RawAssemblingEntities
 {
     public class RawMessageInAssembly : BaseMessageInAssembly
     {
-        public List<BaseFrame> AssembledFrames { get; }
+        public List<BaseFrame> InitialFrames { get; }
+        public List<BaseFrame> MiddleFrames { get; }
+        public List<BaseFrame> FinalFrames { get; }
 
         public RawMessageInAssembly()
         {
-            AssembledFrames = new List<BaseFrame>();
+            InitialFrames = new List<BaseFrame>();
+            MiddleFrames = new List<BaseFrame>();
+            FinalFrames = new List<BaseFrame>();
         }
     }
 }

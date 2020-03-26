@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Assembler.Base;
+using Assembler.Base.MessageEnrichers;
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
 using Assembler.Core.RawAssemblingEntities;
@@ -18,7 +19,7 @@ namespace Assembler.UnitTests
         [SetUp]
         public void Setup()
         {
-            _frameMock = new Mock<BaseFrame>(FrameType.Initial);
+            _frameMock = new Mock<BaseFrame>(AssemblingPosition.Initial);
             _message = new RawMessageInAssembly();
             _enricher = new RawFrameMessageEnricher();
         }
@@ -31,7 +32,7 @@ namespace Assembler.UnitTests
             // Arrange
             for (int i = 0; i < numberOfFrames; i++)
             {
-                _message.AssembledFrames.Add(new Mock<BaseFrame>(FrameType.End).Object);
+                _message.AssembledFrames.Add(new Mock<BaseFrame>(AssemblingPosition.Final).Object);
             }
 
             // Act

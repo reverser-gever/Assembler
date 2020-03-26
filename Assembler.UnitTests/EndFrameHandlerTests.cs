@@ -17,6 +17,7 @@ namespace Assembler.UnitTests
         private Mock<IFactory<BaseFrame, string>> _identifierFactoryMock;
         private Mock<IMessageEnricher<BaseFrame, BaseMessageInAssembly>> _enricherMock;
         private Mock<ICreator<BaseMessageInAssembly>> _messageInAssemblyCreatorMock;
+        private Mock<IMessageReleaser<BaseMessageInAssembly>> _messageReleaserMock;
 
         private List<Tuple<BaseMessageInAssembly, ReleaseReason>> _assembledMessages;
         private string _identifierString;
@@ -27,6 +28,7 @@ namespace Assembler.UnitTests
             _cacheMock = new Mock<ITimeBasedCache<BaseMessageInAssembly>>();
             _enricherMock = new Mock<IMessageEnricher<BaseFrame, BaseMessageInAssembly>>();
             _messageInAssemblyCreatorMock = new Mock<ICreator<BaseMessageInAssembly>>();
+            _messageReleaserMock = new Mock<IMessageReleaser<BaseMessageInAssembly>>();
             _identifierString = Utilities.GetIdentifierString();
             _identifierFactoryMock = Utilities.GetIdentifierMock();
 
@@ -47,7 +49,7 @@ namespace Assembler.UnitTests
         public void Handle_IdentifierInCache_MessageBeingRemovedEnrichedAndRaised(bool shouldReleaseSingleEndFrame)
         {
             // Arrange
-            var frame = new Mock<BaseFrame>(FrameType.End);
+            var frame = new Mock<BaseFrame>(AssemblingPosition.Final);
             var message = new Mock<BaseMessageInAssembly>();
             var handler = GenerateHandler(shouldReleaseSingleEndFrame);
 
@@ -83,7 +85,7 @@ namespace Assembler.UnitTests
         public void Handle_IdentifierNotInCacheAndShouldDispatchSingleFrame_MessageBeingCreatedEnrichedAndReleased()
         {
             // Arrange
-            var frame = new Mock<BaseFrame>(FrameType.End);
+            var frame = new Mock<BaseFrame>(AssemblingPosition.Final);
             var message = new Mock<BaseMessageInAssembly>();
             var handler = GenerateHandler(true);
 
@@ -115,7 +117,7 @@ namespace Assembler.UnitTests
         public void Handle_IdentifierNotInCacheAndShouldntDispatchSingleFrame_NoMessagesBeingReleased()
         {
             // Arrange
-            var frame = new Mock<BaseFrame>(FrameType.End);
+            var frame = new Mock<BaseFrame>(AssemblingPosition.Final);
             var handler = GenerateHandler(false);
 
             _cacheMock.Setup(cache => cache.Exists(It.IsAny<string>())).Returns(false);
@@ -138,7 +140,7 @@ namespace Assembler.UnitTests
         public void Handle_IdentifierThrowsException_FrameNotBeingUsed(bool shouldReleaseSingleEndFrame)
         {
             // Arrange
-            var frame = new Mock<BaseFrame>(FrameType.End);
+            var frame = new Mock<BaseFrame>(AssemblingPosition.Final);
 
             var handler = GenerateHandler(shouldReleaseSingleEndFrame);
 
@@ -155,16 +157,9 @@ namespace Assembler.UnitTests
 
         private EndFrameHandler<BaseFrame, BaseMessageInAssembly> GenerateHandler(bool isToReleaseSingleEndFrame)
         {
-            var handler = new EndFrameHandler<BaseFrame, BaseMessageInAssembly>(_cacheMock.Object,
-                _identifierFactoryMock.Object, _enricherMock.Object, _messageInAssemblyCreatorMock.Object,
+            var handler = new EndFrameHandler<BaseFrame, BaseMessageInAssembly>(_cacheMock.Object, _identifierFactoryMock.Object,
+                _enricherMock.Object, _messageInAssemblyCreatorMock.Object, _messageReleaserMock.Object,
                 isToReleaseSingleEndFrame, Utilities.GetLoggerFactory());
-
-            handler.MessageAssemblyFinished +=
-                delegate (BaseMessageInAssembly messageInAssembly, ReleaseReason releaseReason)
-                {
-                    _assembledMessages.Add(
-                        new Tuple<BaseMessageInAssembly, ReleaseReason>(messageInAssembly, releaseReason));
-                };
 
             return handler;
         }

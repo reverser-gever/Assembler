@@ -1,9 +1,9 @@
 ﻿namespace Assembler.Core.Enums
 {
-    public enum FrameType
+    public enum AssemblingPosition
     {
         Initial,
         Middle,
-        End
+        Final
     }
 }
