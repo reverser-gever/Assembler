@@ -12,10 +12,9 @@ namespace Assembler.Base.FrameHandlers
         private readonly ILogger _logger;
 
         public FinalFrameHandler(ITimeBasedCache<TMessageInAssembly> timeBasedCache,
-            IFactory<TFrame, string> identifierFactory,
+            IFactory<TFrame, string> identifierFactory, ICreator<TMessageInAssembly> messageInAssemblyCreator,
             IMessageEnricher<TFrame, TMessageInAssembly> messageInAssemblyEnricher,
-            ICreator<TMessageInAssembly> messageInAssemblyCreator, IMessageReleaser<TMessageInAssembly> messageReleaser,
-            ILoggerFactory loggerFactory)
+            IMessageReleaser<TMessageInAssembly> messageReleaser, ILoggerFactory loggerFactory)
             : base(timeBasedCache, identifierFactory, messageInAssemblyEnricher, messageInAssemblyCreator,
                 messageReleaser)
         {

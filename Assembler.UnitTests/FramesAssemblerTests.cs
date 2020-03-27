@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Assembler.Base;
 using Assembler.Core;
 using Assembler.Core.Entities;
