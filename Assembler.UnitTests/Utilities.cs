@@ -1,4 +1,5 @@
-﻿using Assembler.Core;
+﻿using System;
+using Assembler.Core;
 using Assembler.Core.Entities;
 using Moq;
 
@@ -27,5 +28,14 @@ namespace Assembler.UnitTests
         }
 
         public static string GetIdentifierString() => "yes very";
+
+        public static Mock<IDateTimeProvider> GetDateTimeProviderMock()
+        {
+            var dateTimeProviderMock = new Mock<IDateTimeProvider>();
+
+            dateTimeProviderMock.Setup(provider => provider.Now).Returns(DateTime.MinValue);
+
+            return dateTimeProviderMock;
+        }
     }
 }

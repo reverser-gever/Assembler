@@ -11,14 +11,15 @@ namespace Assembler.UnitTests.FrameHandlers
     [TestFixture]
     public class InitialFrameHandlerTests
     {
+        private InitialFrameHandler<BaseFrame, BaseMessageInAssembly> _handler;
         private Mock<ITimeBasedCache<BaseMessageInAssembly>> _cacheMock;
         private Mock<IFactory<BaseFrame, string>> _identifierFactoryMock;
         private Mock<IMessageEnricher<BaseFrame, BaseMessageInAssembly>> _enricherMock;
         private Mock<ICreator<BaseMessageInAssembly>> _messageInAssemblyCreatorMock;
         private Mock<IMessageReleaser<BaseMessageInAssembly>> _messageReleaserMock;
-        private string _identifierString;
+        private Mock<IDateTimeProvider> _dateTimeProviderMock;
 
-        private InitialFrameHandler<BaseFrame, BaseMessageInAssembly> _handler;
+        private string _identifierString;
 
         [SetUp]
         public void Setup()
@@ -30,10 +31,11 @@ namespace Assembler.UnitTests.FrameHandlers
 
             _identifierString = Utilities.GetIdentifierString();
             _identifierFactoryMock = Utilities.GetIdentifierMock();
+            _dateTimeProviderMock = Utilities.GetDateTimeProviderMock();
 
             _handler = new InitialFrameHandler<BaseFrame, BaseMessageInAssembly>(_cacheMock.Object,
                 _identifierFactoryMock.Object, _messageInAssemblyCreatorMock.Object, _enricherMock.Object,
-                _messageReleaserMock.Object, Utilities.GetLoggerFactory());
+                _messageReleaserMock.Object, _dateTimeProviderMock.Object, Utilities.GetLoggerFactory());
         }
 
         [TearDown]
@@ -44,6 +46,7 @@ namespace Assembler.UnitTests.FrameHandlers
             _cacheMock.VerifyNoOtherCalls();
             _messageInAssemblyCreatorMock.VerifyNoOtherCalls();
             _messageReleaserMock.VerifyNoOtherCalls();
+            _dateTimeProviderMock.VerifyNoOtherCalls();
         }
 
         [Test]
@@ -64,7 +67,7 @@ namespace Assembler.UnitTests.FrameHandlers
         }
 
         [Test]
-        public void Handle_MessageInCacheAndMiddleReceived_ReleasesTheOldOneAndCreatesANewOne()
+        public void Handle_MessageInCacheAndMiddleReceived_ReleasesTheOldOneWithoutEnrichementAndCreatesANewOne()
         {
             // Arrange
             var frame = new Mock<BaseFrame>(AssemblingPosition.Initial);
@@ -92,6 +95,9 @@ namespace Assembler.UnitTests.FrameHandlers
             _cacheMock.Verify(cache => cache.Remove(It.IsAny<string>()), Times.Once);
             _cacheMock.Verify(cache => cache.Remove(_identifierString), Times.Once);
 
+            // Not being enriched
+            Assert.AreNotEqual(DateTime.MinValue, message.Object.LastFrameReceived);
+
             _messageReleaserMock.Verify(
                 releaser => releaser.Release(It.IsAny<BaseMessageInAssembly>(), It.IsAny<ReleaseReason>()), Times.Once);
             _messageReleaserMock.Verify(
@@ -102,6 +108,9 @@ namespace Assembler.UnitTests.FrameHandlers
             _enricherMock.Verify(enricher => enricher.Enrich(It.IsAny<BaseFrame>(), It.IsAny<BaseMessageInAssembly>()),
                 Times.Once);
             _enricherMock.Verify(enricher => enricher.Enrich(frame.Object, newMessage.Object), Times.Once);
+
+            _dateTimeProviderMock.Verify(provider => provider.Now, Times.Once);
+            Assert.AreEqual(DateTime.MinValue, newMessage.Object.LastFrameReceived);
 
             _cacheMock.Verify(cache => cache.Put(It.IsAny<string>(), It.IsAny<BaseMessageInAssembly>()), Times.Once);
             _cacheMock.Verify(cache => cache.Put(_identifierString, newMessage.Object), Times.Once);
@@ -135,6 +144,9 @@ namespace Assembler.UnitTests.FrameHandlers
                 Times.Once);
             _enricherMock.Verify(enricher => enricher.Enrich(frame.Object, message.Object), Times.Once);
 
+            _dateTimeProviderMock.Verify(provider => provider.Now, Times.Once);
+            Assert.AreEqual(DateTime.MinValue, message.Object.LastFrameReceived);
+
             _cacheMock.Verify(cache => cache.Put(It.IsAny<string>(), It.IsAny<BaseMessageInAssembly>()), Times.Once);
             _cacheMock.Verify(cache => cache.Put(_identifierString, message.Object), Times.Once);
         }
@@ -165,6 +177,9 @@ namespace Assembler.UnitTests.FrameHandlers
             _enricherMock.Verify(enricher => enricher.Enrich(It.IsAny<BaseFrame>(), It.IsAny<BaseMessageInAssembly>()),
                 Times.Once);
             _enricherMock.Verify(enricher => enricher.Enrich(frame.Object, message.Object), Times.Once);
+
+            _dateTimeProviderMock.Verify(provider => provider.Now, Times.Once);
+            Assert.AreEqual(DateTime.MinValue, message.Object.LastFrameReceived);
 
             _cacheMock.Verify(cache => cache.Put(It.IsAny<string>(), It.IsAny<BaseMessageInAssembly>()), Times.Once);
             _cacheMock.Verify(cache => cache.Put(_identifierString, message.Object), Times.Once);
