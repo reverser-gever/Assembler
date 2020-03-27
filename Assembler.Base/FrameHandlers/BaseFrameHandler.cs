@@ -1,4 +1,5 @@
-﻿using Assembler.Core;
+﻿using System;
+using Assembler.Core;
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
 
@@ -13,17 +14,20 @@ namespace Assembler.Base.FrameHandlers
         protected readonly IMessageEnricher<TFrame, TMessageInAssembly> MessageInAssemblyEnricher;
         protected readonly ICreator<TMessageInAssembly> MessageInAssemblyCreator;
         protected readonly IMessageReleaser<TMessageInAssembly> MessageReleaser;
+        protected readonly IDateTimeProvider DateTimeProvider;
 
         protected BaseFrameHandler(ITimeBasedCache<TMessageInAssembly> timeBasedCache,
             IFactory<TFrame, string> identifierFactory,
             IMessageEnricher<TFrame, TMessageInAssembly> messageInAssemblyEnricher,
-            ICreator<TMessageInAssembly> messageInAssemblyCreator, IMessageReleaser<TMessageInAssembly> messageReleaser)
+            ICreator<TMessageInAssembly> messageInAssemblyCreator, IMessageReleaser<TMessageInAssembly> messageReleaser,
+            IDateTimeProvider dateTimeProvider)
         {
             TimeBasedCache = timeBasedCache;
             IdentifierFactory = identifierFactory;
             MessageInAssemblyEnricher = messageInAssemblyEnricher;
             MessageInAssemblyCreator = messageInAssemblyCreator;
             MessageReleaser = messageReleaser;
+            DateTimeProvider = dateTimeProvider;
         }
 
         public abstract void Handle(TFrame frame);
@@ -34,5 +38,11 @@ namespace Assembler.Base.FrameHandlers
         protected string GetIdentifier(TFrame frame) => IdentifierFactory.Create(frame);
 
         protected TMessageInAssembly CreateMessage() => MessageInAssemblyCreator.Create();
+
+        protected void EnrichMessage(TFrame frame, TMessageInAssembly messageInAssembly)
+        {
+            MessageInAssemblyEnricher.Enrich(frame, messageInAssembly);
+            messageInAssembly.LastFrameReceived = DateTimeProvider.Now;
+        }
     }
 }

@@ -38,8 +38,7 @@ namespace Assembler.Base.FrameHandlers
 
             if (TryGetOrCreateMessageInAssembly(identifier, out var message))
             {
-                MessageInAssemblyEnricher.Enrich(frame, message);
-
+                EnrichMessage(frame, message);
                 _logger.Debug(
                     $"Enriched [{message.Guid}] with the frame [{frame.Guid}].");
 
