@@ -31,8 +31,8 @@ namespace Assembler.UnitTests.FrameHandlers
             _identifierFactoryMock = Utilities.GetIdentifierMock();
 
             _handler = new FinalFrameHandler<BaseFrame, BaseMessageInAssembly>(_cacheMock.Object,
-                _identifierFactoryMock.Object, _enricherMock.Object,
-                _messageInAssemblyCreatorMock.Object, _messageReleaserMock.Object, Utilities.GetLoggerFactory());
+                _identifierFactoryMock.Object, _messageInAssemblyCreatorMock.Object,
+                _enricherMock.Object, _messageReleaserMock.Object, Utilities.GetLoggerFactory());
         }
 
         [TearDown]
