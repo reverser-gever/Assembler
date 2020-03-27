@@ -13,6 +13,7 @@ namespace Assembler.Base
         where TFrame : BaseFrame
         where TMessageInAssembly : BaseMessageInAssembly
     {
+        // TODO: Make it a builder after the CR
         public IAssembler<TFrame> Create(
             ITimeBasedCache<TMessageInAssembly> timeBasedCache,
             IFactory<TFrame, string> identifierFactory, ICreator<TMessageInAssembly> messageInAssemblyCreator,
