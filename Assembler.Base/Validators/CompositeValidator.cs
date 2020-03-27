@@ -7,13 +7,13 @@ using Assembler.Core.Enums;
 
 namespace Assembler.Base.Validators
 {
-    public class ValidatorComposite<TMessageInAssembly> : IValidator<TMessageInAssembly>
+    public class CompositeValidator<TMessageInAssembly> : IValidator<TMessageInAssembly>
         where TMessageInAssembly : BaseMessageInAssembly
     {
         private readonly IEnumerable<IValidator<TMessageInAssembly>> _validators;
         private readonly Operator _operator;
 
-        public ValidatorComposite(IEnumerable<IValidator<TMessageInAssembly>> validators, Operator @operator)
+        public CompositeValidator(IEnumerable<IValidator<TMessageInAssembly>> validators, Operator @operator)
         {
             _validators = validators;
             _operator = @operator;
@@ -26,10 +26,10 @@ namespace Assembler.Base.Validators
             switch (_operator)
             {
                 case Operator.And:
-                    return validatorsResults.All(result => true);
+                    return validatorsResults.TrueForAll(result => result.Equals(true));
 
                 case Operator.Or:
-                    return validatorsResults.Any(result => true);
+                    return validatorsResults.Any(result => result.Equals(true));
 
                 default:
                     throw new ArgumentOutOfRangeException();

@@ -1,5 +1,4 @@
-﻿using System;
-using Assembler.Core;
+﻿using Assembler.Core;
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
 
@@ -22,6 +21,11 @@ namespace Assembler.Base
             if (_messageValidator.IsValid(message))
             {
                 base.Release(message, releaseReason);
+            }
+            else
+            {
+                Logger.Warn($"Message [{message.Guid}] with the release reason of [{releaseReason}] " +
+                            "didn't pass the validator, it won't be released.");
             }
         }
     }
