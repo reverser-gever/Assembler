@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Assembler.Core;
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
@@ -28,7 +29,7 @@ namespace Assembler.Base
 
                 handler.Handle(frame);
             }
-            catch (Exception e)
+            catch (KeyNotFoundException e)
             {
                 _logger.Error($"No matching resolver was found for the message [{frame.Guid}]," +
                               $"It won't be used in the assembling process. \n {e}");

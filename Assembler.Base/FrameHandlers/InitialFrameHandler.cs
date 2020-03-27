@@ -40,8 +40,7 @@ namespace Assembler.Base.FrameHandlers
 
             MessageInAssemblyEnricher.Enrich(frame, message);
 
-            _logger.Debug(
-                $"Enriched [{message.Guid}] with the frame [{frame.Guid}] ");
+            _logger.Debug($"Enriched [{message.Guid}] with the frame [{frame.Guid}]");
 
             TimeBasedCache.Put(identifier, message);
         }

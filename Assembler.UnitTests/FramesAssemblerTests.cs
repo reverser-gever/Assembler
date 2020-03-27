@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Assembler.Base;
 using Assembler.Core;
 using Assembler.Core.Entities;
@@ -53,14 +54,14 @@ namespace Assembler.UnitTests
         }
 
         [Test]
-        public void Assemble_ResolverThrows_DoesNotThrow()
+        public void Assemble_ResolverThrowsKeyNotFoundException_DoesNotThrow()
         {
             // Arrange
             var frameType = AssemblingPosition.Initial;
             var message = new Mock<BaseFrame>(frameType);
 
             _resolverMock.Setup(resolver => resolver.Resolve(It.IsAny<AssemblingPosition>()))
-                .Throws<ArgumentException>();
+                .Throws<KeyNotFoundException>();
 
             // Act
             Assert.DoesNotThrow(() => _assembler.Assemble(message.Object));
