@@ -3,7 +3,7 @@ using Assembler.Core;
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
 
-namespace Assembler.Base
+namespace Assembler.Base.FrameHandlers
 {
     public class InitialFrameHandler<TFrame, TMessageInAssembly> : BaseFrameHandler<TFrame, TMessageInAssembly>
         where TFrame : BaseFrame

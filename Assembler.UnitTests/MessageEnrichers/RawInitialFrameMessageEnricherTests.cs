@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using Assembler.Base;
 using Assembler.Base.MessageEnrichers;
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
@@ -7,12 +6,12 @@ using Assembler.Core.RawAssemblingEntities;
 using Moq;
 using NUnit.Framework;
 
-namespace Assembler.UnitTests
+namespace Assembler.UnitTests.MessageEnrichers
 {
     [TestFixture]
-    public class RawFrameMessageEnricherTests
+    public class RawInitialFrameMessageEnricherTests
     {
-        private RawFrameMessageEnricher _enricher;
+        private RawInitialFrameMessageEnricher _enricher;
         private Mock<BaseFrame> _frameMock;
         private RawMessageInAssembly _message;
 
@@ -21,7 +20,7 @@ namespace Assembler.UnitTests
         {
             _frameMock = new Mock<BaseFrame>(AssemblingPosition.Initial);
             _message = new RawMessageInAssembly();
-            _enricher = new RawFrameMessageEnricher();
+            _enricher = new RawInitialFrameMessageEnricher();
         }
 
         [TestCase(1)]
@@ -32,15 +31,15 @@ namespace Assembler.UnitTests
             // Arrange
             for (int i = 0; i < numberOfFrames; i++)
             {
-                _message.AssembledFrames.Add(new Mock<BaseFrame>(AssemblingPosition.Final).Object);
+                _message.InitialFrames.Add(new Mock<BaseFrame>(AssemblingPosition.Initial).Object);
             }
 
             // Act
             _enricher.Enrich(_frameMock.Object, _message);
 
             // Assert
-            Assert.AreEqual(numberOfFrames + 1, _message.AssembledFrames.Count);
-            Assert.AreEqual(_frameMock.Object, _message.AssembledFrames.Last());
+            Assert.AreEqual(numberOfFrames + 1, _message.InitialFrames.Count);
+            Assert.AreEqual(_frameMock.Object, _message.InitialFrames.Last());
         }
 
         [Test]
@@ -50,8 +49,8 @@ namespace Assembler.UnitTests
             _enricher.Enrich(_frameMock.Object, _message);
 
             // Assert
-            Assert.AreEqual(1, _message.AssembledFrames.Count);
-            Assert.AreEqual(_frameMock.Object, _message.AssembledFrames.First());
+            Assert.AreEqual(1, _message.InitialFrames.Count);
+            Assert.AreEqual(_frameMock.Object, _message.InitialFrames.First());
         }
     }
 }

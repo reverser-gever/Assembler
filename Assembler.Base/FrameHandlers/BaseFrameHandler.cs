@@ -2,7 +2,7 @@
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
 
-namespace Assembler.Base
+namespace Assembler.Base.FrameHandlers
 {
     public abstract class BaseFrameHandler<TFrame, TMessageInAssembly> : IFrameHandler<TFrame>
         where TFrame : BaseFrame

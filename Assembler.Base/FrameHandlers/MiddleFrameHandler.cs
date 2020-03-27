@@ -2,7 +2,7 @@
 using Assembler.Core;
 using Assembler.Core.Entities;
 
-namespace Assembler.Base
+namespace Assembler.Base.FrameHandlers
 {
     public class MiddleFrameHandler<TFrame, TMessageInAssembly> : BaseFrameHandler<TFrame, TMessageInAssembly>
         where TFrame : BaseFrame

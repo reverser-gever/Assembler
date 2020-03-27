@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Assembler.Base;
+using Assembler.Base.FrameHandlers;
 using Assembler.Core;
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
 using Moq;
 using NUnit.Framework;
 
-namespace Assembler.UnitTests
+namespace Assembler.UnitTests.FrameHandlers
 {
     [TestFixture]
     public class InitialFrameHandlerTests
@@ -17,8 +15,7 @@ namespace Assembler.UnitTests
         private Mock<IFactory<BaseFrame, string>> _identifierFactoryMock;
         private Mock<IMessageEnricher<BaseFrame, BaseMessageInAssembly>> _enricherMock;
         private Mock<ICreator<BaseMessageInAssembly>> _messageInAssemblyCreatorMock;
-
-        private List<Tuple<BaseMessageInAssembly, ReleaseReason>> _assembledMessages;
+        private Mock<IMessageReleaser<BaseMessageInAssembly>> _messageReleaserMock;
         private string _identifierString;
 
         private InitialFrameHandler<BaseFrame, BaseMessageInAssembly> _handler;
@@ -29,22 +26,14 @@ namespace Assembler.UnitTests
             _cacheMock = new Mock<ITimeBasedCache<BaseMessageInAssembly>>();
             _enricherMock = new Mock<IMessageEnricher<BaseFrame, BaseMessageInAssembly>>();
             _messageInAssemblyCreatorMock = new Mock<ICreator<BaseMessageInAssembly>>();
+            _messageReleaserMock = new Mock<IMessageReleaser<BaseMessageInAssembly>>();
 
             _identifierString = Utilities.GetIdentifierString();
             _identifierFactoryMock = Utilities.GetIdentifierMock();
 
-            _assembledMessages = new List<Tuple<BaseMessageInAssembly, ReleaseReason>>();
-
             _handler = new InitialFrameHandler<BaseFrame, BaseMessageInAssembly>(_cacheMock.Object,
                 _identifierFactoryMock.Object, _messageInAssemblyCreatorMock.Object, _enricherMock.Object,
-                Utilities.GetLoggerFactory());
-
-            _handler.MessageAssemblyFinished +=
-                delegate (BaseMessageInAssembly messageInAssembly, ReleaseReason releaseReason)
-                {
-                    _assembledMessages.Add(
-                        new Tuple<BaseMessageInAssembly, ReleaseReason>(messageInAssembly, releaseReason));
-                };
+                _messageReleaserMock.Object, Utilities.GetLoggerFactory());
         }
 
         [TearDown]
@@ -54,6 +43,7 @@ namespace Assembler.UnitTests
             _enricherMock.VerifyNoOtherCalls();
             _cacheMock.VerifyNoOtherCalls();
             _messageInAssemblyCreatorMock.VerifyNoOtherCalls();
+            _messageReleaserMock.VerifyNoOtherCalls();
         }
 
         [Test]
@@ -66,7 +56,7 @@ namespace Assembler.UnitTests
                 .Throws<NullReferenceException>();
 
             // Act
-            _handler.Handle(frame.Object);
+            Assert.DoesNotThrow(() => _handler.Handle(frame.Object));
 
             // Assert
             _identifierFactoryMock.Verify(identifier => identifier.Create(It.IsAny<BaseFrame>()), Times.Once);
@@ -102,9 +92,10 @@ namespace Assembler.UnitTests
             _cacheMock.Verify(cache => cache.Remove(It.IsAny<string>()), Times.Once);
             _cacheMock.Verify(cache => cache.Remove(_identifierString), Times.Once);
 
-            Assert.AreEqual(1, _assembledMessages.Count);
-            Assert.AreEqual(message.Object, _assembledMessages.First().Item1);
-            Assert.AreEqual(ReleaseReason.AnotherMessageStarted, _assembledMessages.First().Item2);
+            _messageReleaserMock.Verify(
+                releaser => releaser.Release(It.IsAny<BaseMessageInAssembly>(), It.IsAny<ReleaseReason>()), Times.Once);
+            _messageReleaserMock.Verify(
+                releaser => releaser.Release(message.Object, ReleaseReason.AnotherMessageStarted), Times.Once);
 
             _messageInAssemblyCreatorMock.Verify(creator => creator.Create(), Times.Once);
 
@@ -146,8 +137,6 @@ namespace Assembler.UnitTests
 
             _cacheMock.Verify(cache => cache.Put(It.IsAny<string>(), It.IsAny<BaseMessageInAssembly>()), Times.Once);
             _cacheMock.Verify(cache => cache.Put(_identifierString, message.Object), Times.Once);
-
-            Assert.Zero(_assembledMessages.Count);
         }
 
         [Test]
@@ -179,8 +168,6 @@ namespace Assembler.UnitTests
 
             _cacheMock.Verify(cache => cache.Put(It.IsAny<string>(), It.IsAny<BaseMessageInAssembly>()), Times.Once);
             _cacheMock.Verify(cache => cache.Put(_identifierString, message.Object), Times.Once);
-
-            Assert.Zero(_assembledMessages.Count);
         }
     }
 }
