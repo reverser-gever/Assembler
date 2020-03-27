@@ -5,22 +5,20 @@ using Assembler.Core.Enums;
 
 namespace Assembler.Base.FrameHandlers
 {
-    public class EndFrameHandler<TFrame, TMessageInAssembly> : BaseFrameHandler<TFrame, TMessageInAssembly>
+    public class FinalFrameHandler<TFrame, TMessageInAssembly> : BaseFrameHandler<TFrame, TMessageInAssembly>
         where TFrame : BaseFrame
         where TMessageInAssembly : BaseMessageInAssembly
     {
-        private readonly bool _shouldReleaseMessageWithOnlyEndFrame;
         private readonly ILogger _logger;
 
-        public EndFrameHandler(ITimeBasedCache<TMessageInAssembly> timeBasedCache,
+        public FinalFrameHandler(ITimeBasedCache<TMessageInAssembly> timeBasedCache,
             IFactory<TFrame, string> identifierFactory,
             IMessageEnricher<TFrame, TMessageInAssembly> messageInAssemblyEnricher,
             ICreator<TMessageInAssembly> messageInAssemblyCreator, IMessageReleaser<TMessageInAssembly> messageReleaser,
-            bool shouldReleaseMessageWithOnlyEndFrame, ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory)
             : base(timeBasedCache, identifierFactory, messageInAssemblyEnricher, messageInAssemblyCreator,
                 messageReleaser)
         {
-            _shouldReleaseMessageWithOnlyEndFrame = shouldReleaseMessageWithOnlyEndFrame;
             _logger = loggerFactory.GetLogger(this);
         }
 
@@ -69,12 +67,6 @@ namespace Assembler.Base.FrameHandlers
             }
             else
             {
-                if (!_shouldReleaseMessageWithOnlyEndFrame)
-                {
-                    message = null;
-                    return false;
-                }
-
                 message = CreateMessage();
 
                 _logger.Debug($"A new message was created [{message.Guid}].");
