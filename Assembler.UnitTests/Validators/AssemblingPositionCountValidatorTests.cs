@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace Assembler.UnitTests.Validators
 {
     [TestFixture]
-    public class FrameTypeCountValidatorTests
+    public class AssemblingPositionCountValidatorTests
     {
         // Testing Initial
         [TestCase(1, 0, 0, 1, 10, 10, true)]
@@ -34,7 +34,7 @@ namespace Assembler.UnitTests.Validators
             int actualNumberOfMiddleFrames, int actualNumberOfFinalFrames, bool expectedResult)
         {
             // Arrange
-            FrameTypeCountValidator validator = new FrameTypeCountValidator(minimumNumberOfInitialFrames,
+            AssemblingPositionCountValidator validator = new AssemblingPositionCountValidator(minimumNumberOfInitialFrames,
                 minimumNumberOfMiddleFrames, minimumNumberOfFinalFrames);
 
             var message = new RawMessageInAssembly();

@@ -3,13 +3,13 @@ using Assembler.Core.RawAssemblingEntities;
 
 namespace Assembler.Base.Validators
 {
-    public class FrameTypeCountValidator : IValidator<RawMessageInAssembly>
+    public class AssemblingPositionCountValidator : IValidator<RawMessageInAssembly>
     {
         private readonly int _minimumInitialFramesCount;
         private readonly int _minimumMiddleFramesCount;
         private readonly int _minimumFinalFramesCount;
 
-        public FrameTypeCountValidator(int minimumInitialFramesCount, int minimumMiddleFramesCount, int minimumFinalFramesCount)
+        public AssemblingPositionCountValidator(int minimumInitialFramesCount, int minimumMiddleFramesCount, int minimumFinalFramesCount)
         {
             _minimumInitialFramesCount = minimumInitialFramesCount;
             _minimumMiddleFramesCount = minimumMiddleFramesCount;
