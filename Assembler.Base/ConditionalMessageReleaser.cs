@@ -17,7 +17,7 @@ namespace Assembler.Base
             _messageValidator = messageValidator;
         }
 
-        public new void Release(TMessageInAssembly message, ReleaseReason releaseReason)
+        public override void Release(TMessageInAssembly message, ReleaseReason releaseReason)
         {
             if (_messageValidator.IsValid(message))
             {

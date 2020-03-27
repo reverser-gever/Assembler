@@ -20,7 +20,7 @@ namespace Assembler.Base
             timeBasedCache.ItemExpired += ReleaseExpiredMessage;
         }
 
-        public void Release(TMessageInAssembly message, ReleaseReason releaseReason)
+        public virtual void Release(TMessageInAssembly message, ReleaseReason releaseReason)
         {
             Logger.Info($"The message [{message.Guid}] was released, the reason for it is [{releaseReason}]");
 
