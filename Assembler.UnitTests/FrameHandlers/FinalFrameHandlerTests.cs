@@ -107,7 +107,7 @@ namespace Assembler.UnitTests.FrameHandlers
         }
 
         [Test]
-        public void Handle_IdentifierNotInCacheAndShouldDispatchSingleFrame_MessageBeingCreatedEnrichedAndReleased()
+        public void Handle_IdentifierNotInCache_MessageBeingCreatedEnrichedAndReleased()
         {
             // Arrange
             var frame = new Mock<BaseFrame>(AssemblingPosition.Final);
