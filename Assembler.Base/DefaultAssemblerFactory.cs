@@ -2,10 +2,12 @@
 using Assembler.Base.Creators;
 using Assembler.Base.FrameHandlers;
 using Assembler.Base.MessageEnrichers;
+using Assembler.Base.Releasing;
 using Assembler.Core;
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
 using Assembler.Core.RawAssemblingEntities;
+using Microsoft.Extensions.Logging;
 
 namespace Assembler.Base
 {
@@ -16,22 +18,23 @@ namespace Assembler.Base
         // TODO: Make it a builder after the CR
         public IAssembler<TFrame> Create(
             ITimeBasedCache<TMessageInAssembly> timeBasedCache,
-            IFactory<TFrame, string> identifierFactory, ICreator<TMessageInAssembly> messageInAssemblyCreator,
+            IIdentifierGenerator<TFrame> identifierGenerator,
+            IMessageInAssemblyCreator<TMessageInAssembly> messageInAssemblyCreator,
             IMessageEnricher<TFrame, TMessageInAssembly> initialFrameMessageEnricher,
             IMessageEnricher<TFrame, TMessageInAssembly> middleFrameMessageEnricher,
             IMessageEnricher<TFrame, TMessageInAssembly> finalFrameMessageEnricher,
-            IMessageReleaser<TMessageInAssembly> messageReleaser, ILoggerFactory loggerFactory)
+            IMessageReleaser<TMessageInAssembly> messageInAssemblyReleaser, ILoggerFactory loggerFactory)
         {
             var dateTimeProvider = new DateTimeProvider();
 
             var initialFrameHandler = new InitialFrameHandler<TFrame, TMessageInAssembly>(timeBasedCache,
-                identifierFactory, messageInAssemblyCreator, initialFrameMessageEnricher, messageReleaser,
+                identifierGenerator, messageInAssemblyCreator, initialFrameMessageEnricher, messageInAssemblyReleaser,
                 dateTimeProvider, loggerFactory);
             var middleFrameHandler = new MiddleFrameHandler<TFrame, TMessageInAssembly>(timeBasedCache,
-                identifierFactory, messageInAssemblyCreator, middleFrameMessageEnricher, messageReleaser,
+                identifierGenerator, messageInAssemblyCreator, middleFrameMessageEnricher, messageInAssemblyReleaser,
                 dateTimeProvider, loggerFactory);
             var finalFrameHandler = new FinalFrameHandler<TFrame, TMessageInAssembly>(timeBasedCache,
-                identifierFactory, messageInAssemblyCreator, finalFrameMessageEnricher, messageReleaser,
+                identifierGenerator, messageInAssemblyCreator, finalFrameMessageEnricher, messageInAssemblyReleaser,
                 dateTimeProvider, loggerFactory);
 
             var resolver = new GeneralResolver<AssemblingPosition, IFrameHandler<TFrame>>(
@@ -42,33 +45,35 @@ namespace Assembler.Base
                 {AssemblingPosition.Final, finalFrameHandler }
             });
 
+            messageInAssemblyReleaser.Start();
+
             return new FramesAssembler<TFrame>(resolver, loggerFactory);
         }
 
-        public IAssembler<TFrame> CreateRawAssembler(
-            ITimeBasedCache<RawMessageInAssembly> timeBasedCache, IFactory<TFrame, string> identifierFactory,
-            ILoggerFactory loggerFactory, IMessageReleaser<RawMessageInAssembly> messageReleaser = null)
+        public IAssembler<TFrame> CreateRawAssembler(ITimeBasedCache<RawMessageInAssembly> timeBasedCache,
+            IIdentifierGenerator<TFrame> identifierGenerator, ILoggerFactory loggerFactory,
+            IMessageReleaser<RawMessageInAssembly> messageInAssemblyReleaser = null)
         {
             var dateTimeProvider = new DateTimeProvider();
 
-            if (messageReleaser == null)
+            if (messageInAssemblyReleaser == null)
             {
-                messageReleaser = new MessageReleaser<RawMessageInAssembly>(timeBasedCache, loggerFactory);
+                messageInAssemblyReleaser = new MessageInAssemblyReleaser<RawMessageInAssembly>(timeBasedCache, loggerFactory);
             }
 
-            var messageInAssemblyCreator = new RawMessageInAssemblyCreator();
+            var messageInAssemblyCreator = new RawMessageInAssemblyCreator(dateTimeProvider);
             var rawInitialFrameMessageEnricher = new RawInitialFrameMessageEnricher();
             var rawMiddleFrameMessageEnricher = new RawMiddleFrameMessageEnricher();
             var rawFinalFrameMessageEnricher = new RawFinalFrameMessageEnricher();
 
             var initialFrameHandler = new InitialFrameHandler<TFrame, RawMessageInAssembly>(timeBasedCache,
-                identifierFactory, messageInAssemblyCreator, rawInitialFrameMessageEnricher, messageReleaser,
+                identifierGenerator, messageInAssemblyCreator, rawInitialFrameMessageEnricher, messageInAssemblyReleaser,
                 dateTimeProvider, loggerFactory);
             var middleFrameHandler = new MiddleFrameHandler<TFrame, RawMessageInAssembly>(timeBasedCache,
-                identifierFactory, messageInAssemblyCreator, rawMiddleFrameMessageEnricher, messageReleaser,
+                identifierGenerator, messageInAssemblyCreator, rawMiddleFrameMessageEnricher, messageInAssemblyReleaser,
                 dateTimeProvider, loggerFactory);
             var finalFrameHandler = new FinalFrameHandler<TFrame, RawMessageInAssembly>(timeBasedCache,
-                identifierFactory, messageInAssemblyCreator, rawFinalFrameMessageEnricher, messageReleaser,
+                identifierGenerator, messageInAssemblyCreator, rawFinalFrameMessageEnricher, messageInAssemblyReleaser,
                 dateTimeProvider, loggerFactory);
 
             var resolver = new GeneralResolver<AssemblingPosition, IFrameHandler<TFrame>>(
@@ -78,6 +83,8 @@ namespace Assembler.Base
                     {AssemblingPosition.Middle, middleFrameHandler},
                     {AssemblingPosition.Final, finalFrameHandler}
                 });
+
+            messageInAssemblyReleaser.Start();
 
             return new FramesAssembler<TFrame>(resolver, loggerFactory);
         }

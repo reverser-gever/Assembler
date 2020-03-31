@@ -3,18 +3,18 @@ using Assembler.Core.Enums;
 
 namespace Assembler.Core.Entities
 {
-    public abstract class BaseFrame : BaseMessage
+    public abstract class BaseFrame
     {
+        public Guid Guid { get; }
         public AssemblingPosition AssemblingPosition { get; }
 
-        protected BaseFrame(AssemblingPosition assemblingPosition)
+        protected BaseFrame(Guid guid, AssemblingPosition frameType)
         {
-            AssemblingPosition = assemblingPosition;
-        }
-
-        protected BaseFrame(Guid guid, AssemblingPosition frameType) : base(guid)
-        {
+            Guid = guid;
             AssemblingPosition = frameType;
         }
+
+        protected BaseFrame(AssemblingPosition assemblingPosition) : this(Guid.NewGuid(), assemblingPosition)
+        { }
     }
 }

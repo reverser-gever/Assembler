@@ -2,8 +2,9 @@
 {
     public enum ReleaseReason
     {
-        EndReceived,
+        Unreleased,
+        FinalFrameReceived,
         TimeoutReached,
-        AnotherMessageStarted
+        AnotherMessageInitialized
     }
 }

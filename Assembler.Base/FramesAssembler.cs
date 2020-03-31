@@ -2,6 +2,7 @@
 using Assembler.Core;
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
+using Microsoft.Extensions.Logging;
 
 namespace Assembler.Base
 {
@@ -15,7 +16,7 @@ namespace Assembler.Base
             ILoggerFactory loggerFactory)
         {
             _typeToHandlerResolver = typeToHandlerResolver;
-            _logger = loggerFactory.GetLogger(this);
+            _logger = loggerFactory.CreateLogger(ToString());
         }
 
         public void Assemble(TFrame frame)
@@ -24,13 +25,13 @@ namespace Assembler.Base
             {
                 IFrameHandler<TFrame> handler = _typeToHandlerResolver.Resolve(frame.AssemblingPosition);
 
-                _logger.Debug($"Frame [{frame.Guid}] is being sent to the handler.");
+                _logger.LogDebug($"Frame [{frame.Guid}] is being sent to the handler.");
 
                 handler.Handle(frame);
             }
             catch (KeyNotFoundException e)
             {
-                _logger.Error($"No matching resolver was found for the message [{frame.Guid}]," +
+                _logger.LogWarning($"No matching resolver was found for the message [{frame.Guid}]," +
                               $"It won't be used in the assembling process. \n {e}");
             }
         }

@@ -1,6 +1,6 @@
 ﻿namespace Assembler.Core.Enums
 {
-    public enum Operator
+    public enum LogicalOperator
     {
         And,
         Or

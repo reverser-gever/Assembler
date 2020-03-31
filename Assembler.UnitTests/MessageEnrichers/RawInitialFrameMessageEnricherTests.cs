@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Assembler.Base.MessageEnrichers;
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
@@ -19,14 +20,14 @@ namespace Assembler.UnitTests.MessageEnrichers
         public void Setup()
         {
             _frameMock = new Mock<BaseFrame>(AssemblingPosition.Initial);
-            _message = new RawMessageInAssembly();
+            _message = new RawMessageInAssembly(DateTime.MinValue, DateTime.MinValue);
             _enricher = new RawInitialFrameMessageEnricher();
         }
 
         [TestCase(1)]
         [TestCase(10)]
         [TestCase(100)]
-        public void Enrich_NonEmptyListOfFramesInMessage_MessageBringEnriched(int numberOfFrames)
+        public void Enrich_NonEmptyListOfFramesInMessage_MessageBeingEnriched(int numberOfFrames)
         {
             // Arrange
             for (int i = 0; i < numberOfFrames; i++)
@@ -43,7 +44,7 @@ namespace Assembler.UnitTests.MessageEnrichers
         }
 
         [Test]
-        public void Enrich_EmptyListOfFramesInMessage_MessageBringEnriched()
+        public void Enrich_EmptyListOfFramesInMessage_MessageBeingEnriched()
         {
             // Act
             _enricher.Enrich(_frameMock.Object, _message);

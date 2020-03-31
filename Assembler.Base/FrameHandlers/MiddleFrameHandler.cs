@@ -1,6 +1,7 @@
 ﻿using System;
 using Assembler.Core;
 using Assembler.Core.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace Assembler.Base.FrameHandlers
 {
@@ -8,39 +9,26 @@ namespace Assembler.Base.FrameHandlers
         where TFrame : BaseFrame
         where TMessageInAssembly : BaseMessageInAssembly
     {
-        private readonly ILogger _logger;
-
         public MiddleFrameHandler(ITimeBasedCache<TMessageInAssembly> timeBasedCache,
-            IFactory<TFrame, string> identifierFactory, ICreator<TMessageInAssembly> messageInAssemblyCtrCreator,
+            IIdentifierGenerator<TFrame> identifierGenerator,
+            IMessageInAssemblyCreator<TMessageInAssembly> messageInAssemblyCtrCreator,
             IMessageEnricher<TFrame, TMessageInAssembly> messageInAssemblyEnricher,
-            IMessageReleaser<TMessageInAssembly> messageReleaser, IDateTimeProvider dateTimeProvider,
+            IMessageReleaser<TMessageInAssembly> messageInAssemblyReleaser, IDateTimeProvider dateTimeProvider,
             ILoggerFactory loggerFactory)
-            : base(timeBasedCache, identifierFactory, messageInAssemblyEnricher, messageInAssemblyCtrCreator,
-                messageReleaser, dateTimeProvider)
-        {
-            _logger = loggerFactory.GetLogger(this);
-        }
+            : base(timeBasedCache, identifierGenerator, messageInAssemblyEnricher, messageInAssemblyCtrCreator,
+                messageInAssemblyReleaser, dateTimeProvider, loggerFactory)
+        { }
 
         public override void Handle(TFrame frame)
         {
-            string identifier;
-
-            try
-            {
-                identifier = GetIdentifier(frame);
-            }
-            catch (Exception e)
-            {
-                _logger.Error($"There was an error while getting an identifier out of the frame [{frame.Guid}], " +
-                              $"it won't be used it the assembling process \n {e}");
-                return;
-            }
+            if (!TryGetIdentifier(frame, out var identifier)) return;
 
             TMessageInAssembly message = GetOrCreateMessageInAssembly(identifier);
 
             EnrichMessage(frame, message);
-            _logger.Debug(
-                $"Enriched [{message.Guid}] with the frame [{frame.Guid}] ");
+
+            // TODO: Test that it happens both from in cache and in a new one
+            message.MiddleReceived = true;
 
             TimeBasedCache.Put(identifier, message);
         }
@@ -49,14 +37,11 @@ namespace Assembler.Base.FrameHandlers
         {
             if (TimeBasedCache.Exists(identifier))
             {
-                return TimeBasedCache.Get<TMessageInAssembly>(identifier);
+                return TimeBasedCache.Get(identifier);
             }
 
+            LogNoMessageInCache(identifier);
             var message = CreateMessage();
-            message.MiddleReceived = true;
-
-            _logger.Debug(
-                $"No message in cache with the expected identifier, created a new message [{message.Guid}]");
 
             return message;
         }

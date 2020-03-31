@@ -1,8 +1,10 @@
-﻿namespace Assembler.Core
+﻿using Assembler.Core.Entities;
+
+namespace Assembler.Core
 {
-    public interface IFactory<in TIn, out TOut>
+    public interface IIdentifierGenerator<in T>
+        where T : BaseFrame
     {
-        //TODO: Replace with the one we have
-        TOut Create(TIn input);
+        string Create(T input);
     }
 }

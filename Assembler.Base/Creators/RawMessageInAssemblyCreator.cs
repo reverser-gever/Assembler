@@ -3,8 +3,19 @@ using Assembler.Core.RawAssemblingEntities;
 
 namespace Assembler.Base.Creators
 {
-    public class RawMessageInAssemblyCreator : ICreator<RawMessageInAssembly>
+    public class RawMessageInAssemblyCreator : IMessageInAssemblyCreator<RawMessageInAssembly>
     {
-        public RawMessageInAssembly Create() => new RawMessageInAssembly();
+        private readonly IDateTimeProvider _dateTimeProvider;
+
+        public RawMessageInAssemblyCreator(IDateTimeProvider dateTimeProvider)
+        {
+            _dateTimeProvider = dateTimeProvider;
+        }
+
+        public RawMessageInAssembly Create()
+        {
+            var dateTimeNow = _dateTimeProvider.Now;
+            return new RawMessageInAssembly(dateTimeNow, dateTimeNow);
+        }
     }
 }

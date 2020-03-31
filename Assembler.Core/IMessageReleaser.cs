@@ -4,7 +4,7 @@ using Assembler.Core.Enums;
 
 namespace Assembler.Core
 {
-    public interface IMessageReleaser<TMessageInAssembly>
+    public interface IMessageReleaser<TMessageInAssembly> : IStartable
         where TMessageInAssembly : BaseMessageInAssembly
     {
         void Release(TMessageInAssembly message, ReleaseReason releaseReason);

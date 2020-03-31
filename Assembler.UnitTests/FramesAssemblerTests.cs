@@ -53,7 +53,7 @@ namespace Assembler.UnitTests
         }
 
         [Test]
-        public void Assemble_ResolverThrowsKeyNotFoundException_DoesNotThrow()
+        public void Assemble_ResolverThrowsKeyNotFoundException_DoesNotThrowAndNotCallingToHandler()
         {
             // Arrange
             var frameType = AssemblingPosition.Initial;

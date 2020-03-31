@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Assembler.Core.Entities;
 
 namespace Assembler.Core.RawAssemblingEntities
@@ -9,7 +10,8 @@ namespace Assembler.Core.RawAssemblingEntities
         public List<BaseFrame> MiddleFrames { get; }
         public List<BaseFrame> FinalFrames { get; }
 
-        public RawMessageInAssembly()
+        public RawMessageInAssembly(DateTime assemblingStartTime, DateTime lastFrameReceived)
+            : base(assemblingStartTime, lastFrameReceived)
         {
             InitialFrames = new List<BaseFrame>();
             MiddleFrames = new List<BaseFrame>();

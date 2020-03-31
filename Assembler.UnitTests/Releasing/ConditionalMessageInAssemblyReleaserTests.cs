@@ -1,22 +1,23 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Assembler.Base;
+using Assembler.Base.Releasing;
 using Assembler.Core;
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
 using Moq;
 using NUnit.Framework;
 
-namespace Assembler.UnitTests
+namespace Assembler.UnitTests.Releasing
 {
     [TestFixture]
-    public class ConditionalMessageReleaserTests
+    public class ConditionalMessageInAssemblyReleaserTests
     {
-        private ConditionalMessageReleaser<BaseMessageInAssembly> _releaser;
         private Mock<ITimeBasedCache<BaseMessageInAssembly>> _cacheMock;
         private Mock<IValidator<BaseMessageInAssembly>> _validatorMock;
 
-        private Mock<BaseMessageInAssembly> _messageMock;
+        private ConditionalMessageInAssemblyReleaser<BaseMessageInAssembly> _releaser;
+
+        private BaseMessageInAssembly _message;
         private List<BaseMessageInAssembly> _releasedMessages;
 
         [SetUp]
@@ -24,10 +25,10 @@ namespace Assembler.UnitTests
         {
             _cacheMock = new Mock<ITimeBasedCache<BaseMessageInAssembly>>();
             _validatorMock = new Mock<IValidator<BaseMessageInAssembly>>();
-            _messageMock = new Mock<BaseMessageInAssembly>();
+            _message = Utilities.GenerateBaseMessageInAssembly();
             _releasedMessages = new List<BaseMessageInAssembly>();
 
-            _releaser = new ConditionalMessageReleaser<BaseMessageInAssembly>(_validatorMock.Object, _cacheMock.Object,
+            _releaser = new ConditionalMessageInAssemblyReleaser<BaseMessageInAssembly>(_validatorMock.Object, _cacheMock.Object,
                 Utilities.GetLoggerFactory());
 
             _releaser.MessageReleased += _releasedMessages.Add;
@@ -44,33 +45,38 @@ namespace Assembler.UnitTests
         public void Release_ValidatorReturnsTrue_MessageBeingReleased()
         {
             // Arrange
+            var releaseReason = ReleaseReason.AnotherMessageInitialized;
             _validatorMock.Setup(validator => validator.IsValid(It.IsAny<BaseMessageInAssembly>())).Returns(true);
 
             // Act
-            _releaser.Release(_messageMock.Object, ReleaseReason.AnotherMessageStarted);
+            _releaser.Release(_message, releaseReason);
 
             // Assert
             _validatorMock.Verify(validator => validator.IsValid(It.IsAny<BaseMessageInAssembly>()), Times.Once);
-            _validatorMock.Verify(validator => validator.IsValid(_messageMock.Object), Times.Once);
+            _validatorMock.Verify(validator => validator.IsValid(_message), Times.Once);
 
             Assert.AreEqual(1, _releasedMessages.Count);
-            Assert.AreEqual(_messageMock.Object, _releasedMessages.First());
+            Assert.AreEqual(_message, _releasedMessages.First());
+            Assert.AreEqual(releaseReason, _message.ReleaseReason);
         }
 
         [Test]
-        public void Release_ValidatorReturnsTrue_MessageNotBeingReleased()
+        public void Release_ValidatorReturnsFalse_MessageNotBeingReleased()
         {
             // Arrange
+            var releaseReason = ReleaseReason.AnotherMessageInitialized;
+
             _validatorMock.Setup(validator => validator.IsValid(It.IsAny<BaseMessageInAssembly>())).Returns(false);
 
             // Act
-            _releaser.Release(_messageMock.Object, ReleaseReason.AnotherMessageStarted);
+            _releaser.Release(_message, releaseReason);
 
             // Assert
             _validatorMock.Verify(validator => validator.IsValid(It.IsAny<BaseMessageInAssembly>()), Times.Once);
-            _validatorMock.Verify(validator => validator.IsValid(_messageMock.Object), Times.Once);
+            _validatorMock.Verify(validator => validator.IsValid(_message), Times.Once);
 
             Assert.Zero(_releasedMessages.Count);
+            Assert.AreNotEqual(releaseReason, _message.ReleaseReason);
         }
 
         [Test]
@@ -80,14 +86,16 @@ namespace Assembler.UnitTests
             _validatorMock.Setup(validator => validator.IsValid(It.IsAny<BaseMessageInAssembly>())).Returns(true);
 
             // Act
-            _cacheMock.Raise(cache => cache.ItemExpired += null, _messageMock.Object);
+            _releaser.Start();
+            _cacheMock.Raise(cache => cache.ItemExpired += null, _message);
 
             // Assert
             _validatorMock.Verify(validator => validator.IsValid(It.IsAny<BaseMessageInAssembly>()), Times.Once);
-            _validatorMock.Verify(validator => validator.IsValid(_messageMock.Object), Times.Once);
+            _validatorMock.Verify(validator => validator.IsValid(_message), Times.Once);
 
             Assert.AreEqual(1, _releasedMessages.Count);
-            Assert.AreEqual(_messageMock.Object, _releasedMessages.First());
+            Assert.AreEqual(_message, _releasedMessages.First());
+            Assert.AreEqual(ReleaseReason.TimeoutReached, _message.ReleaseReason);
         }
 
         [Test]
@@ -97,13 +105,31 @@ namespace Assembler.UnitTests
             _validatorMock.Setup(validator => validator.IsValid(It.IsAny<BaseMessageInAssembly>())).Returns(false);
 
             // Act
-            _cacheMock.Raise(cache => cache.ItemExpired += null, _messageMock.Object);
+            _releaser.Start();
+            _cacheMock.Raise(cache => cache.ItemExpired += null, _message);
 
             // Assert
             _validatorMock.Verify(validator => validator.IsValid(It.IsAny<BaseMessageInAssembly>()), Times.Once);
-            _validatorMock.Verify(validator => validator.IsValid(_messageMock.Object), Times.Once);
+            _validatorMock.Verify(validator => validator.IsValid(_message), Times.Once);
 
             Assert.Zero(_releasedMessages.Count);
+            Assert.AreNotEqual(ReleaseReason.TimeoutReached, _message.ReleaseReason);
+        }
+
+        [Test]
+        public void Release_StartNotBeingCalledAndCacheRaisesEvent_MessageNotBeingReleased()
+        {
+            // Arrange
+            _validatorMock.Setup(validator => validator.IsValid(It.IsAny<BaseMessageInAssembly>())).Returns(false);
+
+            // Act
+            _cacheMock.Raise(cache => cache.ItemExpired += null, _message);
+
+            // Assert
+            _validatorMock.Verify(validator => validator.IsValid(It.IsAny<BaseMessageInAssembly>()), Times.Never);
+
+            Assert.Zero(_releasedMessages.Count);
+            Assert.AreNotEqual(ReleaseReason.TimeoutReached, _message.ReleaseReason);
         }
     }
 }
