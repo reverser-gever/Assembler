@@ -50,8 +50,7 @@ namespace Assembler.UnitTests.MessageEnrichers
             _enricher.Enrich(_frameMock.Object, _message);
 
             // Assert
-            Assert.AreEqual(1, _message.FinalFrames.Count);
-            Assert.AreEqual(_frameMock.Object, _message.FinalFrames.First());
+            Assert.AreEqual(_frameMock.Object, _message.FinalFrames.Single());
         }
     }
 }

@@ -2,11 +2,12 @@
 using Assembler.Core;
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
+using Assembler.Core.Releasing;
 using Microsoft.Extensions.Logging;
 
 namespace Assembler.Base.Releasing
 {
-    public class MessageInAssemblyReleaser<TMessageInAssembly> : IMessageReleaser<TMessageInAssembly>
+    public class MessageInAssemblyReleaser<TMessageInAssembly> : IMessageInAssemblyReleaser<TMessageInAssembly>
         where TMessageInAssembly : BaseMessageInAssembly
     {
         private readonly ITimeBasedCache<TMessageInAssembly> _timeBasedCache;
@@ -17,7 +18,7 @@ namespace Assembler.Base.Releasing
 
         public MessageInAssemblyReleaser(ITimeBasedCache<TMessageInAssembly> timeBasedCache, ILoggerFactory loggerFactory)
         {
-            Logger = loggerFactory.CreateLogger(ToString());
+            Logger = loggerFactory.CreateLogger(GetType());
             _timeBasedCache = timeBasedCache;
         }
 

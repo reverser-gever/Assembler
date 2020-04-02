@@ -7,6 +7,7 @@ using Assembler.Core;
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
 using Assembler.Core.RawAssemblingEntities;
+using Assembler.Core.Releasing;
 using Microsoft.Extensions.Logging;
 
 namespace Assembler.Base
@@ -23,7 +24,7 @@ namespace Assembler.Base
             IMessageEnricher<TFrame, TMessageInAssembly> initialFrameMessageEnricher,
             IMessageEnricher<TFrame, TMessageInAssembly> middleFrameMessageEnricher,
             IMessageEnricher<TFrame, TMessageInAssembly> finalFrameMessageEnricher,
-            IMessageReleaser<TMessageInAssembly> messageInAssemblyReleaser, ILoggerFactory loggerFactory)
+            IMessageInAssemblyReleaser<TMessageInAssembly> messageInAssemblyReleaser, ILoggerFactory loggerFactory)
         {
             var dateTimeProvider = new DateTimeProvider();
 
@@ -52,7 +53,7 @@ namespace Assembler.Base
 
         public IAssembler<TFrame> CreateRawAssembler(ITimeBasedCache<RawMessageInAssembly> timeBasedCache,
             IIdentifierGenerator<TFrame> identifierGenerator, ILoggerFactory loggerFactory,
-            IMessageReleaser<RawMessageInAssembly> messageInAssemblyReleaser = null)
+            IMessageInAssemblyReleaser<RawMessageInAssembly> messageInAssemblyReleaser = null)
         {
             var dateTimeProvider = new DateTimeProvider();
 

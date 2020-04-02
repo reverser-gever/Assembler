@@ -3,6 +3,7 @@ using Assembler.Base.FrameHandlers;
 using Assembler.Core;
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
+using Assembler.Core.Releasing;
 using Moq;
 using NUnit.Framework;
 
@@ -16,7 +17,7 @@ namespace Assembler.UnitTests.FrameHandlers
         private Mock<IIdentifierGenerator<BaseFrame>> _identifierGeneratorMock;
         private Mock<IMessageEnricher<BaseFrame, BaseMessageInAssembly>> _enricherMock;
         private Mock<IMessageInAssemblyCreator<BaseMessageInAssembly>> _messageInAssemblyCreatorMock;
-        private Mock<IMessageReleaser<BaseMessageInAssembly>> _messageInAssemblyReleaserMock;
+        private Mock<IMessageInAssemblyReleaser<BaseMessageInAssembly>> _messageInAssemblyReleaserMock;
         private Mock<IDateTimeProvider> _dateTimeProviderMock;
 
         private string _identifierString;
@@ -27,7 +28,7 @@ namespace Assembler.UnitTests.FrameHandlers
             _cacheMock = new Mock<ITimeBasedCache<BaseMessageInAssembly>>();
             _enricherMock = new Mock<IMessageEnricher<BaseFrame, BaseMessageInAssembly>>();
             _messageInAssemblyCreatorMock = new Mock<IMessageInAssemblyCreator<BaseMessageInAssembly>>();
-            _messageInAssemblyReleaserMock = new Mock<IMessageReleaser<BaseMessageInAssembly>>();
+            _messageInAssemblyReleaserMock = new Mock<IMessageInAssemblyReleaser<BaseMessageInAssembly>>();
 
             _identifierString = Utilities.GetIdentifierString();
             _identifierGeneratorMock = Utilities.GetIdentifierGeneratorMock();
@@ -56,15 +57,15 @@ namespace Assembler.UnitTests.FrameHandlers
             // Arrange
             var frame = new Mock<BaseFrame>(AssemblingPosition.Final);
 
-            _identifierGeneratorMock.Setup(identifierGenerator => identifierGenerator.Create(It.IsAny<BaseFrame>()))
+            _identifierGeneratorMock.Setup(identifierGenerator => identifierGenerator.Generate(It.IsAny<BaseFrame>()))
                 .Throws<NullReferenceException>();
 
             // Act
             Assert.DoesNotThrow(() => _handler.Handle(frame.Object));
 
             // Assert
-            _identifierGeneratorMock.Verify(identifier => identifier.Create(It.IsAny<BaseFrame>()), Times.Once);
-            _identifierGeneratorMock.Verify(identifier => identifier.Create(frame.Object), Times.Once);
+            _identifierGeneratorMock.Verify(identifier => identifier.Generate(It.IsAny<BaseFrame>()), Times.Once);
+            _identifierGeneratorMock.Verify(identifier => identifier.Generate(frame.Object), Times.Once);
         }
 
         [Test]
@@ -81,8 +82,8 @@ namespace Assembler.UnitTests.FrameHandlers
             _handler.Handle(frame.Object);
 
             // Assert
-            _identifierGeneratorMock.Verify(identifier => identifier.Create(It.IsAny<BaseFrame>()), Times.Once);
-            _identifierGeneratorMock.Verify(identifier => identifier.Create(frame.Object), Times.Once);
+            _identifierGeneratorMock.Verify(identifier => identifier.Generate(It.IsAny<BaseFrame>()), Times.Once);
+            _identifierGeneratorMock.Verify(identifier => identifier.Generate(frame.Object), Times.Once);
 
             _cacheMock.Verify(cache => cache.Exists(It.IsAny<string>()), Times.Once);
             _cacheMock.Verify(cache => cache.Exists(_identifierString), Times.Once);
@@ -120,8 +121,8 @@ namespace Assembler.UnitTests.FrameHandlers
             _handler.Handle(frame.Object);
 
             // Assert
-            _identifierGeneratorMock.Verify(identifier => identifier.Create(It.IsAny<BaseFrame>()), Times.Once);
-            _identifierGeneratorMock.Verify(identifier => identifier.Create(frame.Object), Times.Once);
+            _identifierGeneratorMock.Verify(identifier => identifier.Generate(It.IsAny<BaseFrame>()), Times.Once);
+            _identifierGeneratorMock.Verify(identifier => identifier.Generate(frame.Object), Times.Once);
 
             _cacheMock.Verify(cache => cache.Exists(It.IsAny<string>()), Times.Once);
             _cacheMock.Verify(cache => cache.Exists(_identifierString), Times.Once);

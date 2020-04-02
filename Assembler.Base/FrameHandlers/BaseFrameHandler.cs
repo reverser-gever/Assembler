@@ -2,6 +2,7 @@
 using Assembler.Core;
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
+using Assembler.Core.Releasing;
 using Microsoft.Extensions.Logging;
 
 namespace Assembler.Base.FrameHandlers
@@ -13,7 +14,7 @@ namespace Assembler.Base.FrameHandlers
         private readonly IIdentifierGenerator<TFrame> _identifierGenerator;
         private readonly IMessageEnricher<TFrame, TMessageInAssembly> _messageInAssemblyEnricher;
         private readonly IMessageInAssemblyCreator<TMessageInAssembly> _messageInAssemblyCreator;
-        private readonly IMessageReleaser<TMessageInAssembly> _messageInAssemblyReleaser;
+        private readonly IMessageInAssemblyReleaser<TMessageInAssembly> _messageInAssemblyReleaser;
         private readonly IDateTimeProvider _dateTimeProvider;
 
         protected readonly ITimeBasedCache<TMessageInAssembly> TimeBasedCache;
@@ -23,7 +24,7 @@ namespace Assembler.Base.FrameHandlers
             IIdentifierGenerator<TFrame> identifierGenerator,
             IMessageEnricher<TFrame, TMessageInAssembly> messageInAssemblyEnricher,
             IMessageInAssemblyCreator<TMessageInAssembly> messageInAssemblyCreator,
-            IMessageReleaser<TMessageInAssembly> messageInAssemblyReleaser,
+            IMessageInAssemblyReleaser<TMessageInAssembly> messageInAssemblyReleaser,
             IDateTimeProvider dateTimeProvider, ILoggerFactory loggerFactory)
         {
             TimeBasedCache = timeBasedCache;
@@ -32,7 +33,7 @@ namespace Assembler.Base.FrameHandlers
             _messageInAssemblyCreator = messageInAssemblyCreator;
             _messageInAssemblyReleaser = messageInAssemblyReleaser;
             _dateTimeProvider = dateTimeProvider;
-            Logger = loggerFactory.CreateLogger(ToString());
+            Logger = loggerFactory.CreateLogger(GetType());
         }
 
         public abstract void Handle(TFrame frame);
@@ -41,7 +42,7 @@ namespace Assembler.Base.FrameHandlers
         {
             try
             {
-                identifier = _identifierGenerator.Create(frame);
+                identifier = _identifierGenerator.Generate(frame);
             }
             catch (Exception e)
             {

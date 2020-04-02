@@ -2,9 +2,9 @@
 
 namespace Assembler.Core
 {
-    public interface IMessageInAssemblyCreator<T>
-        where T : BaseMessageInAssembly
+    public interface IMessageInAssemblyCreator<out TMessage>
+        where TMessage : BaseMessageInAssembly
     {
-        T Create();
+        TMessage Create();
     }
 }

@@ -29,13 +29,13 @@ namespace Assembler.UnitTests.Releasing
         }
 
         [TestCase(true, true, LogicalOperator.And, true)]
-        [TestCase(true, true, LogicalOperator.Or, true)]
-        [TestCase(false, false, LogicalOperator.Or, false)]
         [TestCase(false, false, LogicalOperator.And, false)]
         [TestCase(true, false, LogicalOperator.And, false)]
-        [TestCase(true, false, LogicalOperator.Or, true)]
         [TestCase(false, true, LogicalOperator.And, false)]
+        [TestCase(true, true, LogicalOperator.Or, true)]
+        [TestCase(true, false, LogicalOperator.Or, true)]
         [TestCase(false, true, LogicalOperator.Or, true)]
+        [TestCase(false, false, LogicalOperator.Or, false)]
         public void IsValid_VariousLogicalOperatorsAndReturns_MatchingResult(bool firstValidatorReturnValue,
                     bool secondValidatorReturnValue, LogicalOperator logicalOperator, bool expectedResult)
         {

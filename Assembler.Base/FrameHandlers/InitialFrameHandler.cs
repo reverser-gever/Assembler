@@ -1,7 +1,7 @@
-﻿using System;
-using Assembler.Core;
+﻿using Assembler.Core;
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
+using Assembler.Core.Releasing;
 using Microsoft.Extensions.Logging;
 
 namespace Assembler.Base.FrameHandlers
@@ -14,7 +14,7 @@ namespace Assembler.Base.FrameHandlers
             IIdentifierGenerator<TFrame> identifierGenerator,
             IMessageInAssemblyCreator<TMessageInAssembly> messageInAssemblyCreator,
             IMessageEnricher<TFrame, TMessageInAssembly> messageInAssemblyEnricher,
-            IMessageReleaser<TMessageInAssembly> messageInAssemblyReleaser, IDateTimeProvider dateTimeProvider,
+            IMessageInAssemblyReleaser<TMessageInAssembly> messageInAssemblyReleaser, IDateTimeProvider dateTimeProvider,
             ILoggerFactory loggerFactory)
             : base(timeBasedCache, identifierGenerator, messageInAssemblyEnricher, messageInAssemblyCreator,
                 messageInAssemblyReleaser, dateTimeProvider, loggerFactory)

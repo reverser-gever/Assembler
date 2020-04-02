@@ -14,8 +14,8 @@ namespace Assembler.Base.Creators
 
         public RawMessageInAssembly Create()
         {
-            var dateTimeNow = _dateTimeProvider.Now;
-            return new RawMessageInAssembly(dateTimeNow, dateTimeNow);
+            var now = _dateTimeProvider.Now;
+            return new RawMessageInAssembly(now, now);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Assembler.Core;
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
@@ -16,23 +17,42 @@ namespace Assembler.Base
             ILoggerFactory loggerFactory)
         {
             _typeToHandlerResolver = typeToHandlerResolver;
-            _logger = loggerFactory.CreateLogger(ToString());
+            _logger = loggerFactory.CreateLogger(GetType());
         }
 
         public void Assemble(TFrame frame)
         {
+            IFrameHandler<TFrame> handler = ResolveHandler(frame);
+
+            _logger.LogDebug($"Frame [{frame.Guid}] is being sent to the handler.");
+
+            HandleFrame(frame, handler);
+        }
+
+        private IFrameHandler<TFrame> ResolveHandler(TFrame frame)
+        {
             try
             {
-                IFrameHandler<TFrame> handler = _typeToHandlerResolver.Resolve(frame.AssemblingPosition);
-
-                _logger.LogDebug($"Frame [{frame.Guid}] is being sent to the handler.");
-
-                handler.Handle(frame);
+                return _typeToHandlerResolver.Resolve(frame.AssemblingPosition);
             }
-            catch (KeyNotFoundException e)
+            catch (Exception e)
             {
                 _logger.LogWarning($"No matching resolver was found for the message [{frame.Guid}]," +
-                              $"It won't be used in the assembling process. \n {e}");
+                                   $"It won't be used in the assembling process. \n {e}");
+                return null;
+            }
+        }
+
+        private void HandleFrame(TFrame frame, IFrameHandler<TFrame> handler)
+        {
+            try
+            {
+                handler?.Handle(frame);
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning($"Failed handling the message [{frame.Guid}]," +
+                                   $"It won't be used in the assembling process. \n {e}");
             }
         }
     }

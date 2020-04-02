@@ -55,8 +55,7 @@ namespace Assembler.UnitTests.Releasing
             _validatorMock.Verify(validator => validator.IsValid(It.IsAny<BaseMessageInAssembly>()), Times.Once);
             _validatorMock.Verify(validator => validator.IsValid(_message), Times.Once);
 
-            Assert.AreEqual(1, _releasedMessages.Count);
-            Assert.AreEqual(_message, _releasedMessages.First());
+            Assert.AreEqual(_message, _releasedMessages.Single());
             Assert.AreEqual(releaseReason, _message.ReleaseReason);
         }
 
@@ -93,8 +92,7 @@ namespace Assembler.UnitTests.Releasing
             _validatorMock.Verify(validator => validator.IsValid(It.IsAny<BaseMessageInAssembly>()), Times.Once);
             _validatorMock.Verify(validator => validator.IsValid(_message), Times.Once);
 
-            Assert.AreEqual(1, _releasedMessages.Count);
-            Assert.AreEqual(_message, _releasedMessages.First());
+            Assert.AreEqual(_message, _releasedMessages.Single());
             Assert.AreEqual(ReleaseReason.TimeoutReached, _message.ReleaseReason);
         }
 
@@ -130,6 +128,18 @@ namespace Assembler.UnitTests.Releasing
 
             Assert.Zero(_releasedMessages.Count);
             Assert.AreNotEqual(ReleaseReason.TimeoutReached, _message.ReleaseReason);
+        }
+
+        [Test]
+        public void Release_StartAndDisposeBeingCalledAndCacheRaisesEvent_MessageNotBeingReleased()
+        {
+            // Act
+            _releaser.Start();
+            _releaser.Dispose();
+            _cacheMock.Raise(cache => cache.ItemExpired += null, _message);
+
+            // Assert
+            Assert.Zero(_releasedMessages.Count);
         }
     }
 }

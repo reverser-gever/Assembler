@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Assembler.Base.Releasing;
 using Assembler.Core;
@@ -47,8 +46,7 @@ namespace Assembler.UnitTests.Releasing
             _cacheMock.Raise(cache => cache.ItemExpired += null, _message);
 
             // Assert
-            Assert.AreEqual(1, _releasedMessages.Count);
-            Assert.AreEqual(_message, _releasedMessages.First());
+            Assert.AreEqual(_message, _releasedMessages.Single());
         }
 
         [Test]
@@ -62,8 +60,7 @@ namespace Assembler.UnitTests.Releasing
             _releaser.Release(_message, releaseReason);
 
             // Assert
-            Assert.AreEqual(1, _releasedMessages.Count);
-            Assert.AreEqual(_message, _releasedMessages.First());
+            Assert.AreEqual(_message, _releasedMessages.Single());
             Assert.AreEqual(releaseReason, _message.ReleaseReason);
         }
 
@@ -75,8 +72,7 @@ namespace Assembler.UnitTests.Releasing
             _cacheMock.Raise(cache => cache.ItemExpired += null, _message);
 
             // Assert
-            Assert.AreEqual(1, _releasedMessages.Count);
-            Assert.AreEqual(_message, _releasedMessages.First());
+            Assert.AreEqual(_message, _releasedMessages.Single());
             Assert.AreEqual(ReleaseReason.TimeoutReached, _message.ReleaseReason);
         }
 
@@ -84,6 +80,18 @@ namespace Assembler.UnitTests.Releasing
         public void Release_StartNotBeingCalledAndCacheRaisesEvent_MessageNotBeingReleased()
         {
             // Act
+            _cacheMock.Raise(cache => cache.ItemExpired += null, _message);
+
+            // Assert
+            Assert.Zero(_releasedMessages.Count);
+        }
+
+        [Test]
+        public void Release_StartAndDisposeBeingCalledAndCacheRaisesEvent_MessageNotBeingReleased()
+        {
+            // Act
+            _releaser.Start();
+            _releaser.Dispose();
             _cacheMock.Raise(cache => cache.ItemExpired += null, _message);
 
             // Assert

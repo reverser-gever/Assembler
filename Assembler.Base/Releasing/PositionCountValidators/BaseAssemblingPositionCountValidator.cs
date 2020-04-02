@@ -15,7 +15,7 @@ namespace Assembler.Base.Releasing.PositionCountValidators
         protected BaseAssemblingPositionCountValidator(int minimumFramesCount, ILoggerFactory loggerFactory)
         {
             _minimumFramesCount = minimumFramesCount;
-            _logger = loggerFactory.CreateLogger(ToString());
+            _logger = loggerFactory.CreateLogger(GetType());
         }
 
         public bool IsValid(RawMessageInAssembly message)

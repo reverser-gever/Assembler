@@ -1,6 +1,6 @@
-﻿using System;
-using Assembler.Core;
+﻿using Assembler.Core;
 using Assembler.Core.Entities;
+using Assembler.Core.Releasing;
 using Microsoft.Extensions.Logging;
 
 namespace Assembler.Base.FrameHandlers
@@ -13,7 +13,7 @@ namespace Assembler.Base.FrameHandlers
             IIdentifierGenerator<TFrame> identifierGenerator,
             IMessageInAssemblyCreator<TMessageInAssembly> messageInAssemblyCtrCreator,
             IMessageEnricher<TFrame, TMessageInAssembly> messageInAssemblyEnricher,
-            IMessageReleaser<TMessageInAssembly> messageInAssemblyReleaser, IDateTimeProvider dateTimeProvider,
+            IMessageInAssemblyReleaser<TMessageInAssembly> messageInAssemblyReleaser, IDateTimeProvider dateTimeProvider,
             ILoggerFactory loggerFactory)
             : base(timeBasedCache, identifierGenerator, messageInAssemblyEnricher, messageInAssemblyCtrCreator,
                 messageInAssemblyReleaser, dateTimeProvider, loggerFactory)
@@ -27,7 +27,6 @@ namespace Assembler.Base.FrameHandlers
 
             EnrichMessage(frame, message);
 
-            // TODO: Test that it happens both from in cache and in a new one
             message.MiddleReceived = true;
 
             TimeBasedCache.Put(identifier, message);

@@ -2,9 +2,9 @@
 using Assembler.Core.Entities;
 using Assembler.Core.Enums;
 
-namespace Assembler.Core
+namespace Assembler.Core.Releasing
 {
-    public interface IMessageReleaser<TMessageInAssembly> : IStartable
+    public interface IMessageInAssemblyReleaser<TMessageInAssembly> : IStartable
         where TMessageInAssembly : BaseMessageInAssembly
     {
         void Release(TMessageInAssembly message, ReleaseReason releaseReason);

@@ -22,7 +22,7 @@ namespace Assembler.UnitTests
         {
             var identifierGeneratorMock = new Mock<IIdentifierGenerator<BaseFrame>>();
 
-            identifierGeneratorMock.Setup(generator => generator.Create(It.IsAny<BaseFrame>()))
+            identifierGeneratorMock.Setup(generator => generator.Generate(It.IsAny<BaseFrame>()))
                 .Returns(GetIdentifierString());
 
             return identifierGeneratorMock;
@@ -41,6 +41,6 @@ namespace Assembler.UnitTests
 
         public static BaseMessageInAssembly GenerateBaseMessageInAssembly(DateTime assemblingStartTime = default,
             DateTime lastFrameReceived = default) =>
-            new Mock<BaseMessageInAssembly>(assemblingStartTime, lastFrameReceived).Object;
+            new Mock<BaseMessageInAssembly>(assemblingStartTime, lastFrameReceived, false).Object;
     }
 }

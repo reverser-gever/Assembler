@@ -11,11 +11,12 @@ namespace Assembler.Core.Entities
         public DateTime AssemblingStartTime { get; set; }
         public DateTime LastFrameReceived { get; set; }
 
-        protected BaseMessageInAssembly(DateTime assemblingStartTime, DateTime lastFrameReceived)
+        protected BaseMessageInAssembly(DateTime assemblingStartTime, DateTime lastFrameReceived,
+            bool middleReceived = false)
         {
             Guid = Guid.NewGuid();
             ReleaseReason = ReleaseReason.Unreleased;
-            MiddleReceived = false;
+            MiddleReceived = middleReceived;
             AssemblingStartTime = assemblingStartTime;
             LastFrameReceived = lastFrameReceived;
         }
