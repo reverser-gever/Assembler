@@ -23,11 +23,11 @@ namespace Assembler.UnitTests.Releasing
         public void Setup()
         {
             _cacheMock = new Mock<ITimeBasedCache<BaseMessageInAssembly>>();
-            _message = Utilities.GenerateBaseMessageInAssembly();
+            _message = TestUtilities.GenerateBaseMessageInAssembly();
             _releasedMessages = new List<BaseMessageInAssembly>();
 
             _releaser = new MessageInAssemblyReleaser<BaseMessageInAssembly>(_cacheMock.Object,
-                Utilities.GetLoggerFactory());
+                TestUtilities.GetLoggerFactory());
 
             _releaser.MessageReleased += _releasedMessages.Add;
         }
@@ -87,7 +87,7 @@ namespace Assembler.UnitTests.Releasing
         }
 
         [Test]
-        public void Release_StartAndDisposeBeingCalledAndCacheRaisesEvent_MessageNotBeingReleased()
+        public void Dispose_StartAndDisposeBeingCalledAndCacheRaisesEvent_MessageNotBeingReleased()
         {
             // Act
             _releaser.Start();

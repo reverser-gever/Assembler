@@ -37,7 +37,7 @@ namespace Assembler.Base
             }
             catch (Exception e)
             {
-                _logger.LogWarning($"No matching resolver was found for the message [{frame.Guid}]," +
+                _logger.LogWarning($"No matching handler was found for the message [{frame.Guid}]," +
                                    $"It won't be used in the assembling process. \n {e}");
                 return null;
             }

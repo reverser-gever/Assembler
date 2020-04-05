@@ -6,7 +6,7 @@ using Moq;
 
 namespace Assembler.UnitTests
 {
-    public static class Utilities
+    public static class TestUtilities
     {
         public static ILoggerFactory GetLoggerFactory()
         {

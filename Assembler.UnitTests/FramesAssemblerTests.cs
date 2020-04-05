@@ -21,7 +21,7 @@ namespace Assembler.UnitTests
             _resolverMock = new Mock<IResolver<AssemblingPosition, IFrameHandler<BaseFrame>>>();
             _handlerMock = new Mock<IFrameHandler<BaseFrame>>();
 
-            _assembler = new FramesAssembler<BaseFrame>(_resolverMock.Object, Utilities.GetLoggerFactory());
+            _assembler = new FramesAssembler<BaseFrame>(_resolverMock.Object, TestUtilities.GetLoggerFactory());
         }
 
         [TearDown]
@@ -45,10 +45,8 @@ namespace Assembler.UnitTests
             _assembler.Assemble(message.Object);
 
             // Assert
-            _resolverMock.Verify(resolver => resolver.Resolve(It.IsAny<AssemblingPosition>()), Times.Once);
             _resolverMock.Verify(resolver => resolver.Resolve(frameType), Times.Once);
 
-            _handlerMock.Verify(handler => handler.Handle(It.IsAny<BaseFrame>()), Times.Once);
             _handlerMock.Verify(handler => handler.Handle(message.Object), Times.Once);
         }
 
@@ -66,7 +64,6 @@ namespace Assembler.UnitTests
             Assert.DoesNotThrow(() => _assembler.Assemble(message.Object));
 
             // Assert
-            _resolverMock.Verify(resolver => resolver.Resolve(It.IsAny<AssemblingPosition>()), Times.Once);
             _resolverMock.Verify(resolver => resolver.Resolve(frameType), Times.Once);
 
             _handlerMock.Verify(handler => handler.Handle(It.IsAny<BaseFrame>()), Times.Never);

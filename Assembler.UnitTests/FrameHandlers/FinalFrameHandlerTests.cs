@@ -30,14 +30,14 @@ namespace Assembler.UnitTests.FrameHandlers
             _messageInAssemblyCreatorMock = new Mock<IMessageInAssemblyCreator<BaseMessageInAssembly>>();
             _messageInAssemblyReleaserMock = new Mock<IMessageInAssemblyReleaser<BaseMessageInAssembly>>();
 
-            _identifierString = Utilities.GetIdentifierString();
-            _identifierGeneratorMock = Utilities.GetIdentifierGeneratorMock();
-            _dateTimeProviderMock = Utilities.GetDateTimeProviderMock();
+            _identifierString = TestUtilities.GetIdentifierString();
+            _identifierGeneratorMock = TestUtilities.GetIdentifierGeneratorMock();
+            _dateTimeProviderMock = TestUtilities.GetDateTimeProviderMock();
 
             _handler = new FinalFrameHandler<BaseFrame, BaseMessageInAssembly>(_cacheMock.Object,
                 _identifierGeneratorMock.Object, _messageInAssemblyCreatorMock.Object,
                 _enricherMock.Object, _messageInAssemblyReleaserMock.Object, _dateTimeProviderMock.Object,
-                Utilities.GetLoggerFactory());
+                TestUtilities.GetLoggerFactory());
         }
 
         [TearDown]
@@ -49,6 +49,66 @@ namespace Assembler.UnitTests.FrameHandlers
             _messageInAssemblyCreatorMock.VerifyNoOtherCalls();
             _messageInAssemblyReleaserMock.VerifyNoOtherCalls();
             _dateTimeProviderMock.VerifyNoOtherCalls();
+        }
+
+        [Test]
+        public void Handle_IdentifierInCache_MessageBeingRemovedEnrichedAndReleased()
+        {
+            // Arrange
+            var frame = new Mock<BaseFrame>(AssemblingPosition.Final);
+            var message = TestUtilities.GenerateBaseMessageInAssembly();
+
+            _cacheMock.Setup(cache => cache.Exists(It.IsAny<string>())).Returns(true);
+            _cacheMock.Setup(cache => cache.Get(It.IsAny<string>())).Returns(message);
+
+            // Act
+            _handler.Handle(frame.Object);
+
+            // Assert
+            _identifierGeneratorMock.Verify(identifier => identifier.Generate(frame.Object), Times.Once);
+
+            _cacheMock.Verify(cache => cache.Exists(_identifierString), Times.Once);
+
+            _cacheMock.Verify(cache => cache.Get(_identifierString), Times.Once);
+
+            _cacheMock.Verify(cache => cache.Remove(_identifierString), Times.Once);
+
+            _enricherMock.Verify(enricher => enricher.Enrich(frame.Object, message), Times.Once);
+
+            _dateTimeProviderMock.Verify(provider => provider.Now, Times.Once);
+            Assert.AreEqual(DateTime.MinValue, message.LastFrameReceived);
+
+            _messageInAssemblyReleaserMock.Verify(
+                releaser => releaser.Release(message, ReleaseReason.FinalFrameReceived), Times.Once);
+        }
+
+        [Test]
+        public void Handle_IdentifierNotInCache_MessageBeingCreatedEnrichedAndReleased()
+        {
+            // Arrange
+            var frame = new Mock<BaseFrame>(AssemblingPosition.Final);
+            var message = TestUtilities.GenerateBaseMessageInAssembly();
+
+            _cacheMock.Setup(cache => cache.Exists(It.IsAny<string>())).Returns(false);
+            _messageInAssemblyCreatorMock.Setup(creator => creator.Create()).Returns(message);
+
+            // Act
+            _handler.Handle(frame.Object);
+
+            // Assert
+            _identifierGeneratorMock.Verify(identifier => identifier.Generate(frame.Object), Times.Once);
+
+            _cacheMock.Verify(cache => cache.Exists(_identifierString), Times.Once);
+
+            _messageInAssemblyCreatorMock.Verify(creator => creator.Create(), Times.Once);
+
+            _enricherMock.Verify(enricher => enricher.Enrich(frame.Object, message), Times.Once);
+
+            _dateTimeProviderMock.Verify(provider => provider.Now, Times.Once);
+            Assert.AreEqual(DateTime.MinValue, message.LastFrameReceived);
+
+            _messageInAssemblyReleaserMock.Verify(
+                releaser => releaser.Release(message, ReleaseReason.FinalFrameReceived), Times.Once);
         }
 
         [Test]
@@ -64,82 +124,7 @@ namespace Assembler.UnitTests.FrameHandlers
             Assert.DoesNotThrow(() => _handler.Handle(frame.Object));
 
             // Assert
-            _identifierGeneratorMock.Verify(identifier => identifier.Generate(It.IsAny<BaseFrame>()), Times.Once);
             _identifierGeneratorMock.Verify(identifier => identifier.Generate(frame.Object), Times.Once);
-        }
-
-        [Test]
-        public void Handle_IdentifierInCache_MessageBeingRemovedEnrichedAndReleased()
-        {
-            // Arrange
-            var frame = new Mock<BaseFrame>(AssemblingPosition.Final);
-            var message = Utilities.GenerateBaseMessageInAssembly();
-
-            _cacheMock.Setup(cache => cache.Exists(It.IsAny<string>())).Returns(true);
-            _cacheMock.Setup(cache => cache.Get(It.IsAny<string>())).Returns(message);
-
-            // Act
-            _handler.Handle(frame.Object);
-
-            // Assert
-            _identifierGeneratorMock.Verify(identifier => identifier.Generate(It.IsAny<BaseFrame>()), Times.Once);
-            _identifierGeneratorMock.Verify(identifier => identifier.Generate(frame.Object), Times.Once);
-
-            _cacheMock.Verify(cache => cache.Exists(It.IsAny<string>()), Times.Once);
-            _cacheMock.Verify(cache => cache.Exists(_identifierString), Times.Once);
-
-            _cacheMock.Verify(cache => cache.Get(It.IsAny<string>()), Times.Once);
-            _cacheMock.Verify(cache => cache.Get(_identifierString), Times.Once);
-
-            _cacheMock.Verify(cache => cache.Remove(It.IsAny<string>()), Times.Once);
-            _cacheMock.Verify(cache => cache.Remove(_identifierString), Times.Once);
-
-            _enricherMock.Verify(enricher => enricher.Enrich(It.IsAny<BaseFrame>(), It.IsAny<BaseMessageInAssembly>()),
-                Times.Once);
-            _enricherMock.Verify(enricher => enricher.Enrich(frame.Object, message), Times.Once);
-
-            _dateTimeProviderMock.Verify(provider => provider.Now, Times.Once);
-            Assert.AreEqual(DateTime.MinValue, message.LastFrameReceived);
-
-            _messageInAssemblyReleaserMock.Verify(
-                releaser => releaser.Release(It.IsAny<BaseMessageInAssembly>(), It.IsAny<ReleaseReason>()), Times.Once);
-            _messageInAssemblyReleaserMock.Verify(
-                releaser => releaser.Release(message, ReleaseReason.FinalFrameReceived), Times.Once);
-        }
-
-        [Test]
-        public void Handle_IdentifierNotInCache_MessageBeingCreatedEnrichedAndReleased()
-        {
-            // Arrange
-            var frame = new Mock<BaseFrame>(AssemblingPosition.Final);
-            var message = Utilities.GenerateBaseMessageInAssembly();
-
-            _cacheMock.Setup(cache => cache.Exists(It.IsAny<string>())).Returns(false);
-            _messageInAssemblyCreatorMock.Setup(creator => creator.Create()).Returns(message);
-
-            // Act
-            _handler.Handle(frame.Object);
-
-            // Assert
-            _identifierGeneratorMock.Verify(identifier => identifier.Generate(It.IsAny<BaseFrame>()), Times.Once);
-            _identifierGeneratorMock.Verify(identifier => identifier.Generate(frame.Object), Times.Once);
-
-            _cacheMock.Verify(cache => cache.Exists(It.IsAny<string>()), Times.Once);
-            _cacheMock.Verify(cache => cache.Exists(_identifierString), Times.Once);
-
-            _messageInAssemblyCreatorMock.Verify(creator => creator.Create(), Times.Once);
-
-            _enricherMock.Verify(enricher => enricher.Enrich(It.IsAny<BaseFrame>(), It.IsAny<BaseMessageInAssembly>()),
-                Times.Once);
-            _enricherMock.Verify(enricher => enricher.Enrich(frame.Object, message), Times.Once);
-
-            _dateTimeProviderMock.Verify(provider => provider.Now, Times.Once);
-            Assert.AreEqual(DateTime.MinValue, message.LastFrameReceived);
-
-            _messageInAssemblyReleaserMock.Verify(
-                releaser => releaser.Release(It.IsAny<BaseMessageInAssembly>(), It.IsAny<ReleaseReason>()), Times.Once);
-            _messageInAssemblyReleaserMock.Verify(
-                releaser => releaser.Release(message, ReleaseReason.FinalFrameReceived), Times.Once);
         }
     }
 }

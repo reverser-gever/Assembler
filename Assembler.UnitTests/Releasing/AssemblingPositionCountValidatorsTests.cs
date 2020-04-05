@@ -45,9 +45,9 @@ namespace Assembler.UnitTests.Releasing
         {
             var minimumFrames = 2;
 
-            var initialValidator = new InitialAssemblingPositionCountValidator(minimumFrames, Utilities.GetLoggerFactory());
-            var middleValidator = new MiddleAssemblingPositionCountValidator(minimumFrames, Utilities.GetLoggerFactory());
-            var finalValidator = new FinalAssemblingPositionCountValidator(minimumFrames, Utilities.GetLoggerFactory());
+            var initialValidator = new InitialAssemblingPositionCountValidator(minimumFrames, TestUtilities.GetLoggerFactory());
+            var middleValidator = new MiddleAssemblingPositionCountValidator(minimumFrames, TestUtilities.GetLoggerFactory());
+            var finalValidator = new FinalAssemblingPositionCountValidator(minimumFrames, TestUtilities.GetLoggerFactory());
 
             return new object[]
             {

@@ -40,7 +40,7 @@ namespace Assembler.UnitTests.Releasing
                     bool secondValidatorReturnValue, LogicalOperator logicalOperator, bool expectedResult)
         {
             // Arrange
-            var message = Utilities.GenerateBaseMessageInAssembly();
+            var message = TestUtilities.GenerateBaseMessageInAssembly();
 
             _firstValidatorMock.Setup(validator => validator.IsValid(It.IsAny<BaseMessageInAssembly>()))
                 .Returns(firstValidatorReturnValue);
@@ -61,14 +61,11 @@ namespace Assembler.UnitTests.Releasing
             // Assert
             Assert.AreEqual(expectedResult, result);
 
-            _firstValidatorMock.Verify(validator => validator.IsValid(It.IsAny<BaseMessageInAssembly>()), Times.Once);
             _firstValidatorMock.Verify(validator => validator.IsValid(message), Times.Once);
 
             if ((logicalOperator == LogicalOperator.And && firstValidatorReturnValue) ||
                 (logicalOperator == LogicalOperator.Or && !firstValidatorReturnValue))
             {
-                _secondValidatorMock.Verify(validator => validator.IsValid(It.IsAny<BaseMessageInAssembly>()),
-                    Times.Once);
                 _secondValidatorMock.Verify(validator => validator.IsValid(message), Times.Once);
             }
         }
