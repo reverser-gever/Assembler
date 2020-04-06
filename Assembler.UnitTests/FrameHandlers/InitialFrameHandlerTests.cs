@@ -21,6 +21,7 @@ namespace Assembler.UnitTests.FrameHandlers
         private Mock<IDateTimeProvider> _dateTimeProviderMock;
 
         private string _identifierString;
+        private TimeSpan _maxDifference;
 
         [SetUp]
         public void Setup()
@@ -33,8 +34,9 @@ namespace Assembler.UnitTests.FrameHandlers
             _identifierString = TestUtilities.GetIdentifierString();
             _identifierGeneratorMock = TestUtilities.GetIdentifierGeneratorMock();
             _dateTimeProviderMock = TestUtilities.GetDateTimeProviderMock();
+            _maxDifference = TimeSpan.Zero;
 
-            _handler = new InitialFrameHandler<BaseFrame, BaseMessageInAssembly>(_cacheMock.Object,
+            _handler = new InitialFrameHandler<BaseFrame, BaseMessageInAssembly>(_maxDifference, _cacheMock.Object,
                 _identifierGeneratorMock.Object, _messageInAssemblyCreatorMock.Object, _enricherMock.Object,
                 _messageInAssemblyReleaserMock.Object, _dateTimeProviderMock.Object, TestUtilities.GetLoggerFactory());
         }
@@ -54,7 +56,7 @@ namespace Assembler.UnitTests.FrameHandlers
         public void Handle_MessageInCacheAndMiddleReceived_ReleasesTheOldOneWithoutEnrichmentAndCreatesANewOne()
         {
             // Arrange
-            var frame = new Mock<BaseFrame>(AssemblingPosition.Initial);
+            var frame = TestUtilities.GenerateBaseFrame(AssemblingPosition.Initial);
             var message = TestUtilities.GenerateBaseMessageInAssembly(DateTime.MaxValue, DateTime.MaxValue);
             var newMessage = TestUtilities.GenerateBaseMessageInAssembly();
             message.MiddleReceived = true;
@@ -64,10 +66,10 @@ namespace Assembler.UnitTests.FrameHandlers
             _messageInAssemblyCreatorMock.Setup(creator => creator.Create()).Returns(newMessage);
 
             // Act
-            _handler.Handle(frame.Object);
+            _handler.Handle(frame);
 
             // Assert
-            _identifierGeneratorMock.Verify(identifier => identifier.Generate(frame.Object), Times.Once);
+            _identifierGeneratorMock.Verify(identifier => identifier.Generate(frame), Times.Once);
 
             _cacheMock.Verify(cache => cache.Exists(_identifierString), Times.Once);
 
@@ -83,7 +85,7 @@ namespace Assembler.UnitTests.FrameHandlers
 
             _messageInAssemblyCreatorMock.Verify(creator => creator.Create(), Times.Once);
 
-            _enricherMock.Verify(enricher => enricher.Enrich(frame.Object, newMessage), Times.Once);
+            _enricherMock.Verify(enricher => enricher.Enrich(frame, newMessage), Times.Once);
 
             _dateTimeProviderMock.Verify(provider => provider.Now, Times.Once);
             Assert.AreEqual(DateTime.MinValue, newMessage.LastFrameReceived);
@@ -92,10 +94,53 @@ namespace Assembler.UnitTests.FrameHandlers
         }
 
         [Test]
-        public void Handle_MessageInCacheAndMiddleNotReceived_EnrichesTheExistingMessage()
+        public void
+            Handle_MessageInCacheMiddleNotReceivedAndTimeMoreThanMaxDifference_ReleasesTheOldOneWithoutEnrichmentAndCreatesANewOne()
         {
             // Arrange
-            var frame = new Mock<BaseFrame>(AssemblingPosition.Initial);
+            var now = DateTime.Now;
+            var frame = TestUtilities.GenerateBaseFrame(AssemblingPosition.Initial, DateTime.MaxValue);
+            var message = TestUtilities.GenerateBaseMessageInAssembly(now, now);
+            var newMessage = TestUtilities.GenerateBaseMessageInAssembly();
+            message.MiddleReceived = false;
+
+            _cacheMock.Setup(cache => cache.Exists(It.IsAny<string>())).Returns(true);
+            _cacheMock.Setup(cache => cache.Get(It.IsAny<string>())).Returns(message);
+            _messageInAssemblyCreatorMock.Setup(creator => creator.Create()).Returns(newMessage);
+
+            // Act
+            _handler.Handle(frame);
+
+            // Assert
+            _identifierGeneratorMock.Verify(identifier => identifier.Generate(frame), Times.Once);
+
+            _cacheMock.Verify(cache => cache.Exists(_identifierString), Times.Once);
+
+            _cacheMock.Verify(cache => cache.Get(_identifierString), Times.Once);
+
+            _cacheMock.Verify(cache => cache.Remove(_identifierString), Times.Once);
+
+            // Not being enriched
+            Assert.AreNotEqual(DateTime.MinValue, message.LastFrameReceived);
+
+            _messageInAssemblyReleaserMock.Verify(
+                releaser => releaser.Release(message, ReleaseReason.AnotherMessageInitialized), Times.Once);
+
+            _messageInAssemblyCreatorMock.Verify(creator => creator.Create(), Times.Once);
+
+            _enricherMock.Verify(enricher => enricher.Enrich(frame, newMessage), Times.Once);
+
+            _dateTimeProviderMock.Verify(provider => provider.Now, Times.Once);
+            Assert.AreEqual(DateTime.MinValue, newMessage.LastFrameReceived);
+
+            _cacheMock.Verify(cache => cache.Put(_identifierString, newMessage), Times.Once);
+        }
+
+        [Test]
+        public void Handle_MessageInCacheMiddleNotReceivedAndTimeLessThanMaxDifference_EnrichesTheExistingMessage()
+        {
+            // Arrange
+            var frame = TestUtilities.GenerateBaseFrame(AssemblingPosition.Initial);
             var message = TestUtilities.GenerateBaseMessageInAssembly();
             message.MiddleReceived = false;
 
@@ -103,16 +148,16 @@ namespace Assembler.UnitTests.FrameHandlers
             _cacheMock.Setup(cache => cache.Get(It.IsAny<string>())).Returns(message);
 
             // Act
-            _handler.Handle(frame.Object);
+            _handler.Handle(frame);
 
             // Assert
-            _identifierGeneratorMock.Verify(identifier => identifier.Generate(frame.Object), Times.Once);
+            _identifierGeneratorMock.Verify(identifier => identifier.Generate(frame), Times.Once);
 
             _cacheMock.Verify(cache => cache.Exists(_identifierString), Times.Once);
 
             _cacheMock.Verify(cache => cache.Get(_identifierString), Times.Once);
 
-            _enricherMock.Verify(enricher => enricher.Enrich(frame.Object, message), Times.Once);
+            _enricherMock.Verify(enricher => enricher.Enrich(frame, message), Times.Once);
 
             _dateTimeProviderMock.Verify(provider => provider.Now, Times.Once);
             Assert.AreEqual(DateTime.MinValue, message.LastFrameReceived);
@@ -124,7 +169,7 @@ namespace Assembler.UnitTests.FrameHandlers
         public void Handle_MessageNotInCache_CreatesANewMessageAndEnrichesIt()
         {
             // Arrange
-            var frame = new Mock<BaseFrame>(AssemblingPosition.Initial);
+            var frame = TestUtilities.GenerateBaseFrame(AssemblingPosition.Initial);
             var message = TestUtilities.GenerateBaseMessageInAssembly();
             message.MiddleReceived = false;
 
@@ -132,16 +177,16 @@ namespace Assembler.UnitTests.FrameHandlers
             _messageInAssemblyCreatorMock.Setup(creator => creator.Create()).Returns(message);
 
             // Act
-            _handler.Handle(frame.Object);
+            _handler.Handle(frame);
 
             // Assert
-            _identifierGeneratorMock.Verify(identifier => identifier.Generate(frame.Object), Times.Once);
+            _identifierGeneratorMock.Verify(identifier => identifier.Generate(frame), Times.Once);
 
             _cacheMock.Verify(cache => cache.Exists(_identifierString), Times.Once);
 
             _messageInAssemblyCreatorMock.Verify(creator => creator.Create(), Times.Once);
 
-            _enricherMock.Verify(enricher => enricher.Enrich(frame.Object, message), Times.Once);
+            _enricherMock.Verify(enricher => enricher.Enrich(frame, message), Times.Once);
 
             _dateTimeProviderMock.Verify(provider => provider.Now, Times.Once);
             Assert.AreEqual(DateTime.MinValue, message.LastFrameReceived);
@@ -153,16 +198,16 @@ namespace Assembler.UnitTests.FrameHandlers
         public void Handle_IdentifierThrowsException_FrameNotBeingUsed()
         {
             // Arrange
-            var frame = new Mock<BaseFrame>(AssemblingPosition.Initial);
+            var frame = TestUtilities.GenerateBaseFrame(AssemblingPosition.Initial);
 
             _identifierGeneratorMock.Setup(identifier => identifier.Generate(It.IsAny<BaseFrame>()))
                 .Throws<NullReferenceException>();
 
             // Act
-            Assert.DoesNotThrow(() => _handler.Handle(frame.Object));
+            Assert.DoesNotThrow(() => _handler.Handle(frame));
 
             // Assert
-            _identifierGeneratorMock.Verify(identifier => identifier.Generate(frame.Object), Times.Once);
+            _identifierGeneratorMock.Verify(identifier => identifier.Generate(frame), Times.Once);
         }
     }
 }
