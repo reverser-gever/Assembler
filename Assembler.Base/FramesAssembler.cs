@@ -51,7 +51,7 @@ namespace Assembler.Base
             }
             catch (Exception e)
             {
-                _logger.LogWarning($"Failed handling the message [{frame.Guid}]," +
+                _logger.LogError($"Failed handling the message [{frame.Guid}]," +
                                    $"It won't be used in the assembling process. \n {e}");
             }
         }
