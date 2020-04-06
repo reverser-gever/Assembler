@@ -2,9 +2,9 @@
 
 namespace Assembler.Core
 {
-    public interface IAssembler<in TFrame>
+    public interface IIdentifierGenerator<in TFrame>
         where TFrame : BaseFrame
     {
-        void Assemble(TFrame message);
+        string Generate(TFrame input);
     }
 }

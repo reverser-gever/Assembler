@@ -2,9 +2,9 @@
 
 namespace Assembler.Core
 {
-    public interface IAssembler<in TFrame>
+    public interface IFrameHandler<in TFrame>
         where TFrame : BaseFrame
     {
-        void Assemble(TFrame message);
+        void Handle(TFrame message);
     }
 }
