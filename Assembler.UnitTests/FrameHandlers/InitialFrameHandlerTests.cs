@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Assembler.Base.FrameHandlers;
 using Assembler.Core;
 using Assembler.Core.Entities;
@@ -88,6 +89,9 @@ namespace Assembler.UnitTests.FrameHandlers
             _dateTimeProviderMock.Verify(provider => provider.Now, Times.Once);
             Assert.AreEqual(DateTime.MinValue, newMessage.LastFrameReceived);
 
+            Assert.AreEqual(frame.Object.Guid, newMessage.BasedOnGuids.Single());
+            CollectionAssert.DoesNotContain(message.BasedOnGuids, frame.Object.Guid);
+
             _cacheMock.Verify(cache => cache.Put(_identifierString, newMessage), Times.Once);
         }
 
@@ -98,6 +102,10 @@ namespace Assembler.UnitTests.FrameHandlers
             var frame = new Mock<BaseFrame>(AssemblingPosition.Initial);
             var message = TestUtilities.GenerateBaseMessageInAssembly();
             message.MiddleReceived = false;
+
+            message.BasedOnGuids.Add(Guid.NewGuid());
+            message.BasedOnGuids.Add(Guid.NewGuid());
+            var basedOnCount = 2;
 
             _cacheMock.Setup(cache => cache.Exists(It.IsAny<string>())).Returns(true);
             _cacheMock.Setup(cache => cache.Get(It.IsAny<string>())).Returns(message);
@@ -116,6 +124,9 @@ namespace Assembler.UnitTests.FrameHandlers
 
             _dateTimeProviderMock.Verify(provider => provider.Now, Times.Once);
             Assert.AreEqual(DateTime.MinValue, message.LastFrameReceived);
+
+            Assert.AreEqual(frame.Object.Guid, message.BasedOnGuids.Last());
+            Assert.AreEqual(basedOnCount + 1, message.BasedOnGuids.Count);
 
             _cacheMock.Verify(cache => cache.Put(_identifierString, message), Times.Once);
         }
@@ -145,6 +156,8 @@ namespace Assembler.UnitTests.FrameHandlers
 
             _dateTimeProviderMock.Verify(provider => provider.Now, Times.Once);
             Assert.AreEqual(DateTime.MinValue, message.LastFrameReceived);
+
+            Assert.AreEqual(frame.Object.Guid, message.BasedOnGuids.Single());
 
             _cacheMock.Verify(cache => cache.Put(_identifierString, message), Times.Once);
         }

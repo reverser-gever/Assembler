@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Assembler.Core.Enums;
 
 namespace Assembler.Core.Entities
@@ -10,6 +11,7 @@ namespace Assembler.Core.Entities
         public bool MiddleReceived { get; set; }
         public DateTime AssemblingStartTime { get; set; }
         public DateTime LastFrameReceived { get; set; }
+        public List<Guid> BasedOnGuids { get; }
 
         protected BaseMessageInAssembly(DateTime assemblingStartTime, DateTime lastFrameReceived,
             bool middleReceived = false)
@@ -19,6 +21,7 @@ namespace Assembler.Core.Entities
             MiddleReceived = middleReceived;
             AssemblingStartTime = assemblingStartTime;
             LastFrameReceived = lastFrameReceived;
+            BasedOnGuids = new List<Guid>();
         }
     }
 }
