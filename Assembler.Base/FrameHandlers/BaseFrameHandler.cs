@@ -83,7 +83,7 @@ namespace Assembler.Base.FrameHandlers
             _messageInAssemblyEnricher.Enrich(frame, messageInAssembly);
 
             messageInAssembly.LastFrameReceived = _dateTimeProvider.Now;
-            messageInAssembly.BasedOnGuids.Add(frame.Guid);
+            messageInAssembly.BasedOnFramesGuids.Add(frame.Guid);
 
             Logger.LogDebug(
                 $"Enriched [{messageInAssembly.Guid}] with the frame [{frame.Guid}].");
