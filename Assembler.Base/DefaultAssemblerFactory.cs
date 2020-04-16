@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Assembler.Base.Creators;
 using Assembler.Base.FrameHandlers;
 using Assembler.Base.MessageEnrichers;
@@ -18,6 +19,7 @@ namespace Assembler.Base
     {
         // TODO: Make it a builder after the CR
         public IAssembler<TFrame> Create(
+            TimeSpan maxDifferenceBetweenTwoInitialFrames,
             ITimeBasedCache<TMessageInAssembly> timeBasedCache,
             IIdentifierGenerator<TFrame> identifierGenerator,
             IMessageInAssemblyCreator<TMessageInAssembly> messageInAssemblyCreator,
@@ -27,9 +29,9 @@ namespace Assembler.Base
             IMessageInAssemblyReleaser<TMessageInAssembly> messageInAssemblyReleaser, ILoggerFactory loggerFactory)
         {
             var dateTimeProvider = new DateTimeProvider();
-
-            var initialFrameHandler = new InitialFrameHandler<TFrame, TMessageInAssembly>(timeBasedCache,
-                identifierGenerator, messageInAssemblyCreator, initialFrameMessageEnricher, messageInAssemblyReleaser,
+            var initialFrameHandler = new InitialFrameHandler<TFrame, TMessageInAssembly>(
+                maxDifferenceBetweenTwoInitialFrames, timeBasedCache, identifierGenerator,
+                messageInAssemblyCreator, initialFrameMessageEnricher, messageInAssemblyReleaser,
                 dateTimeProvider, loggerFactory);
             var middleFrameHandler = new MiddleFrameHandler<TFrame, TMessageInAssembly>(timeBasedCache,
                 identifierGenerator, messageInAssemblyCreator, middleFrameMessageEnricher, messageInAssemblyReleaser,
@@ -51,7 +53,8 @@ namespace Assembler.Base
             return new FramesAssembler<TFrame>(resolver, loggerFactory);
         }
 
-        public IAssembler<TFrame> CreateRawAssembler(ITimeBasedCache<RawMessageInAssembly> timeBasedCache,
+        public IAssembler<TFrame> CreateRawAssembler(
+            TimeSpan maxDifferenceBetweenTwoInitialFrames, ITimeBasedCache<RawMessageInAssembly> timeBasedCache,
             IIdentifierGenerator<TFrame> identifierGenerator, ILoggerFactory loggerFactory,
             IMessageInAssemblyReleaser<RawMessageInAssembly> messageInAssemblyReleaser = null)
         {
@@ -59,7 +62,8 @@ namespace Assembler.Base
 
             if (messageInAssemblyReleaser == null)
             {
-                messageInAssemblyReleaser = new MessageInAssemblyReleaser<RawMessageInAssembly>(timeBasedCache, loggerFactory);
+                messageInAssemblyReleaser =
+                    new MessageInAssemblyReleaser<RawMessageInAssembly>(timeBasedCache, loggerFactory);
             }
 
             var messageInAssemblyCreator = new RawMessageInAssemblyCreator(dateTimeProvider);
@@ -67,8 +71,10 @@ namespace Assembler.Base
             var rawMiddleFrameMessageEnricher = new RawMiddleFrameMessageEnricher();
             var rawFinalFrameMessageEnricher = new RawFinalFrameMessageEnricher();
 
-            var initialFrameHandler = new InitialFrameHandler<TFrame, RawMessageInAssembly>(timeBasedCache,
-                identifierGenerator, messageInAssemblyCreator, rawInitialFrameMessageEnricher, messageInAssemblyReleaser,
+            var initialFrameHandler = new InitialFrameHandler<TFrame, RawMessageInAssembly>(
+                maxDifferenceBetweenTwoInitialFrames, timeBasedCache,
+                identifierGenerator, messageInAssemblyCreator, rawInitialFrameMessageEnricher,
+                messageInAssemblyReleaser,
                 dateTimeProvider, loggerFactory);
             var middleFrameHandler = new MiddleFrameHandler<TFrame, RawMessageInAssembly>(timeBasedCache,
                 identifierGenerator, messageInAssemblyCreator, rawMiddleFrameMessageEnricher, messageInAssemblyReleaser,

@@ -1,6 +1,7 @@
 ﻿using System;
 using Assembler.Core;
 using Assembler.Core.Entities;
+using Assembler.Core.Enums;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -42,5 +43,9 @@ namespace Assembler.UnitTests
         public static BaseMessageInAssembly GenerateBaseMessageInAssembly(DateTime assemblingStartTime = default,
             DateTime lastFrameReceived = default) =>
             new Mock<BaseMessageInAssembly>(assemblingStartTime, lastFrameReceived, false).Object;
+
+        public static BaseFrame GenerateBaseFrame
+            (AssemblingPosition assemblingPosition, DateTime startTime = default) =>
+            new Mock<BaseFrame>(assemblingPosition, startTime).Object;
     }
 }

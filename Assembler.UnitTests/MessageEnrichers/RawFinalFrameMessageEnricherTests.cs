@@ -13,13 +13,13 @@ namespace Assembler.UnitTests.MessageEnrichers
     public class RawFinalFrameMessageEnricherTests
     {
         private RawFinalFrameMessageEnricher _enricher;
-        private Mock<BaseFrame> _frameMock;
+        private BaseFrame _frame;
         private RawMessageInAssembly _message;
 
         [SetUp]
         public void Setup()
         {
-            _frameMock = new Mock<BaseFrame>(AssemblingPosition.Final);
+            _frame = TestUtilities.GenerateBaseFrame(AssemblingPosition.Final);
             _message = new RawMessageInAssembly(DateTime.MinValue, DateTime.MinValue);
             _enricher = new RawFinalFrameMessageEnricher();
         }
@@ -32,25 +32,25 @@ namespace Assembler.UnitTests.MessageEnrichers
             // Arrange
             for (int i = 0; i < numberOfFrames; i++)
             {
-                _message.FinalFrames.Add(new Mock<BaseFrame>(AssemblingPosition.Final).Object);
+                _message.FinalFrames.Add(TestUtilities.GenerateBaseFrame(AssemblingPosition.Final));
             }
 
             // Act
-            _enricher.Enrich(_frameMock.Object, _message);
+            _enricher.Enrich(_frame, _message);
 
             // Assert
             Assert.AreEqual(numberOfFrames + 1, _message.FinalFrames.Count);
-            Assert.AreEqual(_frameMock.Object, _message.FinalFrames.Last());
+            Assert.AreEqual(_frame, _message.FinalFrames.Last());
         }
 
         [Test]
         public void Enrich_EmptyListOfFramesInMessage_MessageBeingEnriched()
         {
             // Act
-            _enricher.Enrich(_frameMock.Object, _message);
+            _enricher.Enrich(_frame, _message);
 
             // Assert
-            Assert.AreEqual(_frameMock.Object, _message.FinalFrames.Single());
+            Assert.AreEqual(_frame, _message.FinalFrames.Single());
         }
     }
 }

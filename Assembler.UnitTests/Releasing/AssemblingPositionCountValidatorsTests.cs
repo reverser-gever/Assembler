@@ -21,17 +21,17 @@ namespace Assembler.UnitTests.Releasing
 
             for (int i = 0; i < numberOfInitialFrames; i++)
             {
-                message.InitialFrames.Add(new Mock<BaseFrame>(AssemblingPosition.Initial).Object);
+                message.InitialFrames.Add(TestUtilities.GenerateBaseFrame(AssemblingPosition.Initial));
             }
 
             for (int i = 0; i < numberOfMiddleFrames; i++)
             {
-                message.MiddleFrames.Add(new Mock<BaseFrame>(AssemblingPosition.Middle).Object);
+                message.MiddleFrames.Add(TestUtilities.GenerateBaseFrame(AssemblingPosition.Middle));
             }
 
             for (int i = 0; i < numberOfFinalFrames; i++)
             {
-                message.FinalFrames.Add(new Mock<BaseFrame>(AssemblingPosition.Final).Object);
+                message.FinalFrames.Add(TestUtilities.GenerateBaseFrame(AssemblingPosition.Final));
             }
 
             // Act

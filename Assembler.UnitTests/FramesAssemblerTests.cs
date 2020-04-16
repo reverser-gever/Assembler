@@ -36,18 +36,18 @@ namespace Assembler.UnitTests
         {
             // Arrange
             var frameType = AssemblingPosition.Initial;
-            var message = new Mock<BaseFrame>(frameType);
+            var frame = TestUtilities.GenerateBaseFrame(frameType);
 
             _resolverMock.Setup(resolver => resolver.Resolve(It.IsAny<AssemblingPosition>()))
                 .Returns(_handlerMock.Object);
 
             // Act
-            _assembler.Assemble(message.Object);
+            _assembler.Assemble(frame);
 
             // Assert
             _resolverMock.Verify(resolver => resolver.Resolve(frameType), Times.Once);
 
-            _handlerMock.Verify(handler => handler.Handle(message.Object), Times.Once);
+            _handlerMock.Verify(handler => handler.Handle(frame), Times.Once);
         }
 
         [Test]
@@ -55,13 +55,13 @@ namespace Assembler.UnitTests
         {
             // Arrange
             var frameType = AssemblingPosition.Initial;
-            var message = new Mock<BaseFrame>(frameType);
+            var frame = TestUtilities.GenerateBaseFrame(frameType);
 
             _resolverMock.Setup(resolver => resolver.Resolve(It.IsAny<AssemblingPosition>()))
                 .Throws<KeyNotFoundException>();
 
             // Act
-            Assert.DoesNotThrow(() => _assembler.Assemble(message.Object));
+            Assert.DoesNotThrow(() => _assembler.Assemble(frame));
 
             // Assert
             _resolverMock.Verify(resolver => resolver.Resolve(frameType), Times.Once);
