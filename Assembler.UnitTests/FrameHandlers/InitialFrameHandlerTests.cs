@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Assembler.Base.FrameHandlers;
 using Assembler.Core;
@@ -104,10 +105,10 @@ namespace Assembler.UnitTests.FrameHandlers
             message.MiddleReceived = false;
             var firstFrameGuid = Guid.Parse("fd12ccc0-11ab-4fb4-a051-d03f17dee6cd");
             var secondFrameGuid = Guid.Parse("ab12ccc0-11ab-4fb4-a051-d03f17dee6cd");
+            var expectedBasedOns = new List<Guid> { firstFrameGuid, secondFrameGuid, frame.Object.Guid };
 
             message.BasedOnFramesGuids.Add(firstFrameGuid);
             message.BasedOnFramesGuids.Add(secondFrameGuid);
-            var basedOnCount = 2;
 
             _cacheMock.Setup(cache => cache.Exists(It.IsAny<string>())).Returns(true);
             _cacheMock.Setup(cache => cache.Get(It.IsAny<string>())).Returns(message);
@@ -127,8 +128,7 @@ namespace Assembler.UnitTests.FrameHandlers
             _dateTimeProviderMock.Verify(provider => provider.Now, Times.Once);
             Assert.AreEqual(DateTime.MinValue, message.LastFrameReceived);
 
-            Assert.AreEqual(frame.Object.Guid, message.BasedOnFramesGuids.Last());
-            Assert.AreEqual(basedOnCount + 1, message.BasedOnFramesGuids.Count);
+            CollectionAssert.AreEqual(expectedBasedOns, message.BasedOnFramesGuids);
 
             _cacheMock.Verify(cache => cache.Put(_identifierString, message), Times.Once);
         }
