@@ -81,7 +81,9 @@ namespace Assembler.Base.FrameHandlers
         protected void EnrichMessage(TFrame frame, TMessageInAssembly messageInAssembly)
         {
             _messageInAssemblyEnricher.Enrich(frame, messageInAssembly);
+
             messageInAssembly.LastFrameReceived = _dateTimeProvider.Now;
+            messageInAssembly.BasedOnFramesGuids.Add(frame.Guid);
 
             Logger.LogDebug(
                 $"Enriched [{messageInAssembly.Guid}] with the frame [{frame.Guid}].");

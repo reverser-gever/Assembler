@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Assembler.Base.FrameHandlers;
 using Assembler.Core;
 using Assembler.Core.Entities;
@@ -57,6 +59,12 @@ namespace Assembler.UnitTests.FrameHandlers
             // Arrange
             var frame = new Mock<BaseFrame>(AssemblingPosition.Final);
             var message = TestUtilities.GenerateBaseMessageInAssembly();
+            var firstFrameGuid = Guid.Parse("fd12ccc0-11ab-4fb4-a051-d03f17dee6cd");
+            var secondFrameGuid = Guid.Parse("ab12ccc0-11ab-4fb4-a051-d03f17dee6cd");
+            var expectedBasedOns = new List<Guid> { firstFrameGuid, secondFrameGuid, frame.Object.Guid };
+
+            message.BasedOnFramesGuids.Add(firstFrameGuid);
+            message.BasedOnFramesGuids.Add(secondFrameGuid);
 
             _cacheMock.Setup(cache => cache.Exists(It.IsAny<string>())).Returns(true);
             _cacheMock.Setup(cache => cache.Get(It.IsAny<string>())).Returns(message);
@@ -77,6 +85,8 @@ namespace Assembler.UnitTests.FrameHandlers
 
             _dateTimeProviderMock.Verify(provider => provider.Now, Times.Once);
             Assert.AreEqual(DateTime.MinValue, message.LastFrameReceived);
+
+            CollectionAssert.AreEqual(expectedBasedOns, message.BasedOnFramesGuids);
 
             _messageInAssemblyReleaserMock.Verify(
                 releaser => releaser.Release(message, ReleaseReason.FinalFrameReceived), Times.Once);
@@ -106,6 +116,8 @@ namespace Assembler.UnitTests.FrameHandlers
 
             _dateTimeProviderMock.Verify(provider => provider.Now, Times.Once);
             Assert.AreEqual(DateTime.MinValue, message.LastFrameReceived);
+
+            Assert.AreEqual(frame.Object.Guid, message.BasedOnFramesGuids.Single());
 
             _messageInAssemblyReleaserMock.Verify(
                 releaser => releaser.Release(message, ReleaseReason.FinalFrameReceived), Times.Once);
