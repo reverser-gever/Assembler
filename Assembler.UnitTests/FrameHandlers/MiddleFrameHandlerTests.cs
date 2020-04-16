@@ -57,9 +57,11 @@ namespace Assembler.UnitTests.FrameHandlers
             // Arrange
             var frame = new Mock<BaseFrame>(AssemblingPosition.Middle);
             var message = TestUtilities.GenerateBaseMessageInAssembly();
+            var firstFrameGuid = Guid.Parse("fd12ccc0-11ab-4fb4-a051-d03f17dee6cd");
+            var secondFrameGuid = Guid.Parse("ab12ccc0-11ab-4fb4-a051-d03f17dee6cd");
 
-            message.BasedOnFramesGuids.Add(Guid.NewGuid());
-            message.BasedOnFramesGuids.Add(Guid.NewGuid());
+            message.BasedOnFramesGuids.Add(firstFrameGuid);
+            message.BasedOnFramesGuids.Add(secondFrameGuid);
             var basedOnCount = 2;
 
             _cacheMock.Setup(cache => cache.Exists(It.IsAny<string>())).Returns(true);
